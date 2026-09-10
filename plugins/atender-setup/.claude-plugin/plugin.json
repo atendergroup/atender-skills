@@ -1,0 +1,15 @@
+{
+  "name": "atender-setup",
+  "version": "0.1.0",
+  "description": "Set up an Atender workspace over the Atender MCP server — Agent Stacks (text and voice), Capabilities, the chat widget, email and the phone menu — against checked, reviewed checklists.",
+  "author": {
+    "name": "Erik Windahl Olsen",
+    "email": "ewo@luckyriver.com"
+  },
+  "keywords": [
+    "atender",
+    "mcp",
+    "setup",
+    "agent-stacks"
+  ]
+}

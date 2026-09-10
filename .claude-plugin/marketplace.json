@@ -1,0 +1,23 @@
+{
+  "name": "atender-skills",
+  "description": "Atender's skills for AI assistants — set up and audit an Atender workspace over the Atender MCP server.",
+  "owner": {
+    "name": "Erik Windahl Olsen",
+    "url": "https://atender.com"
+  },
+  "plugins": [
+    {
+      "name": "atender-setup",
+      "source": "./plugins/atender-setup",
+      "description": "Set up or audit an Atender workspace over the Atender MCP server — Agent Stacks for text and voice, Capabilities, the chat widget, email and the phone menu.",
+      "version": "0.1.0",
+      "category": "setup",
+      "tags": [
+        "atender",
+        "mcp",
+        "setup",
+        "agent-stacks"
+      ]
+    }
+  ]
+}
