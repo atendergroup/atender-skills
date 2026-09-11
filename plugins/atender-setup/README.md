@@ -1,7 +1,7 @@
 # Atender Setup
 
 A Claude Code plugin that sets up and audits an Atender workspace over the
-Atender MCP server. Six skills, one per area of the product, built from the
+Atender MCP server. Eight skills, one per area of the product, built from the
 reviewed setup content behind `atender.com/docs/mcp-setup` (evidence date
 2026-09-10).
 
@@ -9,12 +9,14 @@ reviewed setup content behind `atender.com/docs/mcp-setup` (evidence date
 
 | Skill | What it owns |
 | --- | --- |
+| `atender-workspace` | The ground the workspace stands on: the company profile the other skills reuse, the brand on every surface, teams, tags, opening hours, the satisfaction survey, the SMS sender name and the signature |
 | `atender-agent-stack-text` | The Agent Stack for email, chat, SMS, WhatsApp, Messenger and custom channels: the stack and its members, specialists, personality, handover to people, customer verification, test conversations |
 | `atender-agent-stack-voice` | The voice Agent Stack: stack type, a voice per language, greeting, pace, transfer queues, fallback, and what handover and verification do differently on a call |
 | `atender-capabilities` | Connecting the customer's own API: parse, endpoints, identity, tiers, redaction, create, publish, assign |
 | `atender-web-chat` | The chat widget, custom channels, install snippet, test page, after-hours, branding |
 | `atender-email` | Sending domains, DNS, the MX warning, inboxes, deliverability, SMS sender name, signatures |
 | `atender-ivr` | Call queues, phone numbers, the flow graph, retries and timeouts, opening hours, publish, bind, test |
+| `atender-audit` | Reading the whole workspace and reporting the gaps against every checklist here, changing nothing |
 
 Every skill starts by reading `skills/_shared/atender-setup-basics.md`, which
 carries the shared ground below.
@@ -49,9 +51,10 @@ or with a workspace API key that starts with `sa_live_`, sent as an
 - **Pacing.** One call every 2 seconds. A test call is a real call that costs money.
 - **The report.** Every checklist id, grouped by area: `done | skipped (reason) | blocked (reason)`, or `met | gap | unreadable` for an inspect-only run. Then the ids created, the steps that must be done in the app, and the open items with today's date.
 
-The groundwork areas — Teams and tags, Knowledge Base, Handbook — have their full
-checklists in `skills/_shared/atender-setup-basics.md`, because no single skill
-owns them.
+The Knowledge Base and Handbook checklists live in
+`skills/_shared/atender-setup-basics.md`, because no single skill owns them.
+Teams, tags, opening hours and the brand belong to `atender-workspace`, which is
+the first skill to run on a new workspace.
 
 ## Install
 

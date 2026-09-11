@@ -15,16 +15,18 @@ approval, apply, verify, then report against a checklist.
 
 | Skill | What it owns |
 | --- | --- |
+| `atender-workspace` | The ground the workspace stands on: the company profile the other skills reuse, the brand on every surface, teams, tags, opening hours, the satisfaction survey, the SMS sender name and the signature |
 | `atender-agent-stack-text` | The Agent Stack for email, chat, SMS, WhatsApp, Messenger and custom channels: members, specialists, personality, handover to people, customer verification, test conversations |
 | `atender-agent-stack-voice` | The voice Agent Stack: stack type, a voice per language, greeting, pace, transfer queues, fallback, and what differs on a call |
 | `atender-capabilities` | Connecting the customer's own API: parse, endpoints, identity, tiers, redaction, create, publish, assign |
 | `atender-web-chat` | The chat widget, custom channels, install snippet, test page, after-hours, branding |
 | `atender-email` | Sending domains, DNS, the MX warning, inboxes, deliverability, SMS sender name, signatures |
 | `atender-ivr` | Call queues, phone numbers, the flow graph, retries and timeouts, opening hours, publish, bind, test |
+| `atender-audit` | Reading the whole workspace and reporting the gaps against every checklist here, changing nothing |
 
 Each skill starts by reading `skills/_shared/atender-setup-basics.md`, which
 holds the connection, the order of areas, the preflight, the pacing and the
-report format once, so the six skills agree.
+report format once, so the eight skills agree.
 
 ## Install
 

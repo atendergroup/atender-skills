@@ -26,7 +26,7 @@ the order of work and for how to test.
 
 Teams and call queues come before the stack can transfer anywhere.
 
-## Needs from the customer
+## Needs from the customer (or from `atender-profile.md`)
 
 - A voice for each language, chosen from the Atender catalogue.
 - The first sentence a caller hears, for each language.

@@ -1,9 +1,9 @@
 # Atender setup basics
 
-Read this before any of the six setup skills. It carries what every area needs:
-how to connect, who wins when sources disagree, the order of work, the preflight,
-pacing, the report format, and the groundwork areas (Teams and tags, Knowledge
-Base, Handbook) that no single skill owns.
+Read this before any of the eight skills. It carries what every area needs: how
+to connect, who wins when sources disagree, the order of work, the preflight,
+pacing, the report format, and the two groundwork areas (Knowledge Base,
+Handbook) that no single skill owns.
 
 Evidence date of the content in these skills: 2026-09-10. Anything marked
 unconfirmed below is not a fact — check the live schema before you rely on it.
@@ -82,6 +82,9 @@ filter, `includeArchived=true`, every page), `list_handbook`, `list_agent_stacks
 `list_voice_phone_numbers`, `list_voice_call_queues`, `list_ivr_flows`,
 `list_opening_hours_rules`.
 
+If `atender-profile.md` exists in the working folder, read it and do not ask the
+customer the questions it already answers.
+
 Then report three lists: reads that worked, write scopes the plan needs, and what
 you could not check. A read does not prove write access. Do not filter a list you
 use to decide what exists.
@@ -124,36 +127,11 @@ open items with today's date. If something repeats or misfires, give the count.
 
 ---
 
-## Groundwork: Teams and tags
+## Groundwork: teams, tags and the workspace settings
 
-Goal: every group that picks up work is a team, and every tag any area applies
-exists before anything applies it.
-
-Read first: `list_teams`, `list_users`, `list_tags`.
-
-Needs from the customer: the groups of people who answer customers and who is in
-each; the subjects they want to filter conversations by.
-
-- **TT-01** Scopes: see the scope map above.
-- **TT-02** One team per group that picks up work, named after the people, not a subject. At least one team, even empty.
-- **TT-03** `create_teams` with `memberIds` from `list_users`, only for names not in `list_teams`.
-- **TT-04** Change members only by the full-list merge in the loop above.
-- **TT-05** Tags = the tags the areas in play apply, plus the customer's filter subjects. Short, in the team's language.
-- **TT-06** `create_tags`: `name` (max 100, exact case), `description` (one line; the auto-tag model reads it). No update route exists, so the description is final. Create only names not in `list_tags`.
-
-Rules:
-
-- A second `create_tags` with an existing name answers 500. It made nothing. List again, do not retry.
-- Tags made here never auto-tag. Tell the user which to switch on in the app.
-- Teams cannot be deleted here. Tags can (`delete_tags`); ask first.
-- `list_users` shows only users who are in a team. Say so if someone named is missing.
-- KB tags are a different list. Never use them for conversations.
-
-Verify: `list_teams` and `list_tags` — each planned name exists once, with its
-members and description.
-
-In the app: switch on AI auto-tagging per tag; add a user who is in no team;
-delete a team.
+Teams, tags, opening hours, the brand, the satisfaction survey, the SMS sender
+name and the email signature belong to `atender-workspace`. Run that skill first
+on a new workspace; everything below assumes its teams and tags already exist.
 
 ## Groundwork: Knowledge Base
 

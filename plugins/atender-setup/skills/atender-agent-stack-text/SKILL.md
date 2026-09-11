@@ -17,15 +17,16 @@ customer. Calls are a different area: use `atender-agent-stack-voice`.
 ## Before you start
 
 Read `../_shared/atender-setup-basics.md` first — connection, precedence, the
-order of areas, the preflight, pacing, the report format and the Teams, tags,
-Knowledge Base and Handbook groundwork. Then call
+order of areas, the preflight, pacing, the report format and the Knowledge Base
+and Handbook groundwork. Then call
 `describe_configuration_model`. The live tool schemas win for field names and
 shapes; this skill wins over `describe_configuration_model` for the order of work
 and for how to test.
 
 Teams, tags, the Knowledge Base and the Handbook come before anything here.
+`atender-workspace` owns the first two.
 
-## Needs from the customer
+## Needs from the customer (or from `atender-profile.md`)
 
 - What customers write in about, in the customer's own words.
 - Which job answers when nothing else fits.
