@@ -57,6 +57,7 @@ Stack's `voiceLanguageVoices` takes ElevenLabs ids. They are not interchangeable
 - `invalidPrompt` plays on a key that is not offered.
 - After `maxRetries`, the flow follows the `timeout` edge. Send it somewhere a person can help, not back to the menu.
 
+<!-- site:skip -->
 ## Checking the graph yourself (IV-05)
 
 The validator does not check any of this. Before you publish, walk the graph and

@@ -125,6 +125,7 @@ domain is a 400. The limits are 20 domains, and 10 waiting on DNS.
 
 There is no delete route. Removing a domain stays an app job.
 
+<!-- site:skip -->
 ## Not on the API
 
 | What | Where it happens |

@@ -56,6 +56,25 @@ The Knowledge Base and Handbook checklists live in
 Teams, tags, opening hours and the brand belong to `atender-workspace`, which is
 the first skill to run on a new workspace.
 
+## `<!-- site:skip -->`
+
+An HTML comment `<!-- site:skip -->` on a line of its own, immediately before a
+`## ` or `### ` heading, means one thing: the website at
+<https://www.atender.com/docs/mcp-setup> leaves that section out of the prompt
+it renders from these files. The section runs to the next heading of the same or
+higher level.
+
+**If you are an assistant reading a skill, ignore the comment and read the
+section.** It is there for the website, not for you.
+
+What carries the marker: background and rationale written for a reader who has
+the whole file open, rules that belong in the MCP server's own
+`describe_configuration_model`, and reference prose that restates a checklist
+item the checklist already carries. What never carries it: Needs from the
+customer, any Checklist, Rules, Verify, What must be done in the app, any table
+of field names, enums or limits, the minimum a lone stack needs, and the safe
+test path.
+
 ## Install
 
 The marketplace manifest is at the repo root, so the whole repo is the

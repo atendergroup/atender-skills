@@ -15,6 +15,7 @@
 The widget is created with `create_chat_widget` and changed with
 `update_chat_widget`.
 
+<!-- site:skip -->
 ## Taking the AI off a widget
 
 There is no off switch on the widget itself. To stop the AI answering while the
@@ -26,6 +27,7 @@ stops.
 There is no public delete route for a widget, on purpose. A widget is deleted in
 the app, not from here.
 
+<!-- site:skip -->
 ## Routing
 
 A widget conversation goes to `defaultTeamId` and is answered by
@@ -33,6 +35,7 @@ A widget conversation goes to `defaultTeamId` and is answered by
 send different pages to different teams, use more than one widget, or route
 inside the Agent Stack with specialist routing rules.
 
+<!-- site:skip -->
 ## After hours
 
 1. `create_opening_hours_rule` with `timezone` as an IANA name such as `Europe/Oslo` — the default is UTC — and `holidayCountry`.
@@ -42,6 +45,7 @@ inside the Agent Stack with specialist routing rules.
 A team and channel pair with no assignment takes the default rule. No rule at all
 reads as always open.
 
+<!-- site:skip -->
 ## The install snippet
 
 No route returns the install tag today. Build it by hand, with the widget id from
@@ -55,6 +59,7 @@ It answers as soon as it loads. Put it on a page nobody visits first — a stagi
 page, or a page behind a login — run the checks below, and only then hand it to
 the customer for the real page.
 
+<!-- site:skip -->
 ## The test page
 
 - Open the page and start a conversation. Record the widget session id at the moment you open it: an anonymous conversation is not on the conversation list, so without the id you cannot read the run back.

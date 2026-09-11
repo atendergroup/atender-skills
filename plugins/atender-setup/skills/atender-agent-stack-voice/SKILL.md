@@ -50,6 +50,7 @@ Teams and call queues come before the stack can transfer anywhere.
 Field names, language-code forms and the transfer decision are in
 `references/voice-fields.md`.
 
+<!-- site:skip -->
 ## What does not apply on a call today
 
 On a voice stack only `handoverTeamId`, `voiceHandoverAiTeam`,

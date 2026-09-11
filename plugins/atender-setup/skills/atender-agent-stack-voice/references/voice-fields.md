@@ -11,6 +11,7 @@
 | `language` on an IVR `say-message` or `gather-input` node | BCP-47 (`nb-NO`, `en-GB`) |
 | `ttsLanguage` on an IVR flow | BCP-47 |
 
+<!-- site:skip -->
 ## Voice ids
 
 **Create the stack without `voiceLanguageVoices`.** The server fills the map with
@@ -26,6 +27,7 @@ guess one — a wrong id makes every call in that language fail.
 used by the phone menu's own nodes. The two lists are not interchangeable, and a
 Polly name in the stack map breaks the call.
 
+<!-- site:skip -->
 ## Choosing the transfer target
 
 Exactly one of these resolves, in this order:
@@ -37,6 +39,7 @@ Exactly one of these resolves, in this order:
 With none of them resolvable the stack has no transfer at all. Then the business
 rules must say the assistant cannot transfer, so it does not promise one.
 
+<!-- site:skip -->
 ## Fallback
 
 `voiceFallbackAction` defaults to `hangup`. Set it to `queue` (with
@@ -48,6 +51,7 @@ Two things keep a caller out of an endless hold, and you need both: set
 offered a call back rather than a wait; and put an `is-open` node before every
 send-to-queue in the flow, so a closed team is never handed a call at all.
 
+<!-- site:skip -->
 ## The business rules block (VO-08)
 
 Write these into the voice stack's business rules, and nowhere else:

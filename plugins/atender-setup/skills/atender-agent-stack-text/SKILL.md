@@ -82,6 +82,7 @@ three real situations: wording and routing only, no conversation, no handover
 commit, no routing decision. Never `create_conversations_inbound` here: every AI
 reply is a real email.
 
+<!-- site:skip -->
 ## The other checklists
 
 | Reference | Ids |

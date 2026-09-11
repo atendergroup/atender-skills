@@ -7,12 +7,14 @@ session.
 Set all of this in `authModeConfig`, with `update_api_definitions`, before any
 tier above `read` (CA-04).
 
+<!-- site:skip -->
 ## `sessionVariableMapping`
 
 Maps the verified session onto variables the request can use. A variable filled
 this way is filled only after the customer has proved who they are — so the
 specialist's Brief must say: verify first.
 
+<!-- site:skip -->
 ## `claimVariableMapping`
 
 After a one-time code, the claim holds the verified email address or the E.164
@@ -34,12 +36,14 @@ lists the people on that account. Then check the live schema for
 One connection holds one ownership rule. If two operations need different
 ownership rules, they need two connections.
 
+<!-- site:skip -->
 ## Redaction
 
 `test_api_definitions_redaction` against a real sample response first, then write
 `redactionRules`, `redactionApplyDefaults` and `redactionCustomFields`. Redaction
 is what stops a response field the model never needed from reaching the customer.
 
+<!-- site:skip -->
 ## Diagnosing an identity failure
 
 1. Did the customer verify? On text channels `list_conversation_events` shows `verification_requested` and `verification_completed`. A call writes no verification event.

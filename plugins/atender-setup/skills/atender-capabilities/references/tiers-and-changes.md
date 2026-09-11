@@ -32,6 +32,7 @@ After any of these, refresh each Playbook that quotes the Capability: send a
 PATCH to the Playbook, then read `synthesizedProse` back. A Playbook belongs to
 one specialist, and a copy drifts.
 
+<!-- site:skip -->
 ## The publish checklist
 
 `publish_capabilities` runs a checklist, but only on the transition to

@@ -1,11 +1,13 @@
 # Email domains, DNS and deliverability
 
+<!-- site:skip -->
 ## Provisioned domain or the customer's own
 
 Atender provides a sending domain out of the box. Use it unless the customer
 wants mail to come from their own domain. Their own domain costs a DNS change and
 a verification round; the provisioned one costs nothing.
 
+<!-- site:skip -->
 ## The MX warning
 
 `create_email_domains` returns a record set that **includes MX**, and MX records
@@ -41,6 +43,7 @@ value back from `get_email_domains` and compare character by character. A
 trailing dot, a split TXT value, or an SPF record that was replaced rather than
 merged are the usual causes.
 
+<!-- site:skip -->
 ## The inbox, in the safe order
 
 1. `create_email_channels` with `mainAgentId`, `teamId` and `status: "disabled"`.
@@ -51,6 +54,7 @@ merged are the usual causes.
 An inbox created on a domain that is not `active` is refused with 400
 `DOMAIN_INACTIVE`.
 
+<!-- site:skip -->
 ## Reading deliverability back
 
 - `list_email_deliverability_suppressions` — addresses Atender will not send to. A bounced or complained address lands here and stays until it is removed. This is the first thing to read when a reply never arrives.
@@ -67,6 +71,7 @@ activity, not the conversation.
 - `list_sms_numbers` shows what exists; `list_sms_messages` and `get_sms_message` read a message back, and `refresh_sms_message_status` re-reads its status from the carrier.
 - Never set SMS `enabled` to false as a pause. It stops one-time codes too, so every customer verification on SMS fails silently.
 
+<!-- site:skip -->
 ## Signatures
 
 `set_default_signature` and `get_default_signature` are a **person's** signature
