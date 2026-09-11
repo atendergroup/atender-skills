@@ -35,7 +35,7 @@ caller hears today.
 - The greeting and each choice, in each language, and the key for each choice.
 - Where each key goes: a team's queue, a call back, the Agent Stack, voicemail or a message.
 - The language key, if there is one.
-- The opening-hours rule, and what a caller gets out of hours.
+- The opening-hours rule, its `timezone` as an IANA name (`Europe/Oslo`), and what a caller gets out of hours.
 - Whether calls are recorded. This is a legal decision for the customer.
 - Whether a number is assigned to this workspace. If not, they request one in the app. That costs money.
 
@@ -55,6 +55,7 @@ caller hears today.
 - A write is live on a bound number. Write the definition before the bind.
 - After a change to a number, a stack or a flow, the first call more than 30 seconds later reads the change.
 - The greeting is at most two sentences: who we are, what the line is for, then the first choice.
+- An `is-open` node reads the rule's own timezone. Ask the customer for it as an IANA name and send it in `timezone` on the rule: a rule written without it stores `UTC` in silence, and the line then opens and closes by the offset. Read `timezone` back before you blame the flow.
 - A test call is a real call that costs money. Get a yes before each one, and do not score the first call.
 
 ## Verify

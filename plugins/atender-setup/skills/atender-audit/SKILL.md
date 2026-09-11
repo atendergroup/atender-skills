@@ -38,12 +38,12 @@ whether a gap is on purpose.
 - **AU-02** Read every area with the list and get tools in `references/read-map.md`, one call per line, at most one call every 2 seconds.
 - **AU-03** Record every read that answered 403, with the scope in the message, and list them at the top of the report. A refused read is unreadable, never a gap.
 - **AU-04** Report per area, in the basics file's inspect format: `met | gap (what is missing) | unreadable (why)`, keyed to the checklist ids of the skill that owns the area — `WS-`, `KB-`, `HB-`, `AS-`, `SP-`, `PE-`, `HO-`, `CV-`, `TC-`, `CA-`, `CH-`, `VO-`, `IV-`.
-- **AU-05** Walk the ten faults below. Each gets a line whether or not it is present.
+- **AU-05** Walk the eleven faults below. Each gets a line whether or not it is present.
 - **AU-06** For each gap, name the skill that fixes it and the one tool that does it. Do not write a plan of calls; that is the owning skill's job.
 - **AU-07** Rank the gaps by what they stop: nothing reaches a customer, then a customer gets a worse answer, then a setting is untidy.
 - **AU-08** Output one markdown report. Nothing else.
 
-## The ten faults to look for
+## The eleven faults to look for
 
 1. Knowledge Base articles that sit at `draft`. Only `published` reaches the AI.
 2. A specialist that must follow policy with `handbookEnabled` false. The default is false on purpose: judge it against the specialist's job, never report the default itself as a fault. On text, this switch and `kbEnabled` gate retrieval; the stack's `knowledgeBaseEnabled` is a voice switch and gates nothing on text.
@@ -55,6 +55,7 @@ whether a gap is on purpose.
 8. A keyed `gather-input` with no `timeout` edge, a self edge, or a `send-to-queue` with no `is-open` before it. There is no per-key check: a `gather-input` declares no list of keys.
 9. Tags created and never used, and tags the areas apply that do not exist. An unknown tag name is dropped with a 200.
 10. A widget, channel, number or queue that names a stack that is disabled or gone, and a stack that nothing names at all.
+11. An opening-hours rule whose `timezone` reads `UTC` in a workspace whose stated timezone is not UTC. The rule was written without `timezone`. Every open-or-closed decision reads the rule's own timezone, so the hours are off by the offset and nothing reports it.
 
 ## Rules
 

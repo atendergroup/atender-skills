@@ -66,7 +66,7 @@ This order wins over any other order you read. Why each step is where it is:
 - Knowledge Base and Handbook before the stack answers anybody.
 - Capability: endpoint, then capability, then publish, then attach. A create with status published is refused.
 - Verification settings before any Capability above the read tier.
-- Opening hours before the opening-hours handover switch. Always send `timezone` as an IANA name such as `Europe/Oslo`; the default is UTC.
+- Opening hours before the opening-hours handover switch. Ask the customer which timezone the hours are in, as an IANA name such as `Europe/Oslo`, and send that answer in `timezone` on every rule. Leave it out and the API stores `UTC` without saying so.
 - Call queues before an IVR flow; the number after both. Without a queue the write answers 201 and the number never syncs.
 
 If an area needs an earlier step that does not exist, add it to the plan or
