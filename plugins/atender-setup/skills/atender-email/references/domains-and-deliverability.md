@@ -25,8 +25,7 @@ one change in this area that can take a company's mail down.
 ## The DNS records
 
 `create_email_domains` {`domainName`, `fromEmail`, `fromName`} returns
-`dnsRecords`. Give them to the customer as a table with four columns: type, host,
-value, and what it is for.
+`dnsRecords`. Hand them over as a table: type, host, value, what it is for.
 
 | Type | What it is for | Care |
 | --- | --- | --- |
@@ -35,13 +34,11 @@ value, and what it is for.
 | MX | Receives mail for the domain | Only on a domain or subdomain that receives nothing else |
 | TXT (DMARC) | Policy for SPF and DKIM failures | **Do not touch it.** If none exists, leave it to the customer |
 
-Then, after they publish: `create_email_domains_verify`, once. Status must read
-`active` and every record `valid`.
-
-If a record still reads `invalid` after the TTL has passed, read the expected
-value back from `get_email_domains` and compare character by character. A
-trailing dot, a split TXT value, or an SPF record that was replaced rather than
-merged are the usual causes.
+After they publish: `create_email_domains_verify`, once. Status must read
+`active` and every record `valid`. If a record still reads `invalid` after the
+TTL has passed, read the expected value back from `get_email_domains` and
+compare character by character — a trailing dot, a split TXT value, or an SPF
+record replaced rather than merged are the usual causes.
 
 <!-- site:skip -->
 ## The inbox, in the safe order

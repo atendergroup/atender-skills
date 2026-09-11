@@ -46,26 +46,19 @@ Reading email domains needs `email:read`; the rest of this area needs
 - **CH-08** `update_sms_settings` {`senderName`}. `update_sms_number_routing` takes `teamId` or `mainAgentId`, never both.
 - **CH-09** Brand: `update_email_brand_settings`, `update_branding`, and `set_default_signature` where a person's signature is wanted.
 
-The DNS record table, the MX warning, the delays and the deliverability reads are
-in `references/domains-and-deliverability.md`.
+The DNS record table, the delays and the deliverability reads are in
+`references/domains-and-deliverability.md`.
 
 ## Rules
 
-- **The returned records include MX, and MX records move all inbound mail for the name they are published on.** If the apex already receives mail — company mailboxes, a help desk, anything — do not put them there: use a subdomain such as `mail.example.com`. Say this to the customer in plain words before they touch DNS.
-- Merge the SPF value into the existing SPF record. A domain may have only one. Do not touch DMARC.
+- Say the MX warning in CH-02 to the customer in plain words before they touch DNS. It is the one change here that can take a company's mail down.
 - An inbox on a domain that is not `active` is refused with 400 `DOMAIN_INACTIVE`. Verify the domain first.
-- Never set SMS `enabled` to false as a pause. It stops one-time codes too.
 - `set_default_signature` is a person's signature, not the AI's. The assistant's wording lives in the stack personality, and there is no greeting or signature field there.
-- Publishing the DNS records happens in the customer's DNS, not here.
-- Never delete or overwrite an inbox or a domain unless the customer says yes to that object by name.
 
 ## Delays
 
 DNS propagation is not instant. Publish, wait, then call
-`create_email_domains_verify` once — do not poll it in a loop. If a record still
-reads `invalid` after the customer's TTL has passed, read the exact expected
-value back from `get_email_domains` and compare it character by character with
-what is published; a trailing dot or a split TXT value is the usual cause.
+`create_email_domains_verify` once — never poll it in a loop.
 
 ## Verify
 
@@ -78,7 +71,6 @@ what is published; a trailing dot or a split TXT value is the usual cause.
 
 ## What must be done in the app
 
-Publishing the DNS records the customer's own DNS provider holds. Requesting an
-SMS number. Entering any real credential. Tell the customer which of these are
-waiting on them, and give them the record table to hand to whoever runs their
-DNS.
+Publishing the DNS records at their own DNS provider. Requesting an SMS number.
+Entering any real credential. Tell the customer which are waiting on them, and
+give them the record table to hand to whoever runs their DNS.

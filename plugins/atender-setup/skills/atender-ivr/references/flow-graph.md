@@ -1,14 +1,6 @@
 # The IVR flow graph
 
-`update_ivr_flows_definition` takes the whole graph in one write. Write it before
-you bind the flow to a number, because a write is live on a bound number.
-
-The queues come first. `create_voice_call_queues` before `create_ivr_flows`:
-without a queue the flow write answers 201 and the number never syncs.
-
-After every `update_ivr_flows_definition`, call `publish_ivr_flows` and check
-`provisioningError` is null. An unpublished definition changes nothing a caller
-hears.
+`update_ivr_flows_definition` takes the whole graph in one write.
 
 ## Node types
 
@@ -23,14 +15,13 @@ hears.
 | `send-to-ai-agent` | `agentId`, `languageCode` (primary subtag: `no`, `en`) | none |
 | voicemail | as the live schema says | none |
 
-Read the live tool schema for the exact field names and for any node type not
-listed here. The schema wins.
+The live tool schema wins on field names and on any node type not listed here.
 
 ## Rules for the graph
 
 - Exactly one `incoming-call`.
-- An `is-open` node comes before **every** `send-to-queue`. A queue holds a caller with no ceiling, and there is no maximum hold time to set — pair the `is-open` with `callbackEnabled` and a low trigger position on the queue itself (IV-01).
-- Every key you name in a prompt has a matching `digit-N` edge. A key with no edge is a dead press. This one you read, you do not compute: a `gather-input` declares no list of keys, so there is no list to check the edges against.
+- An `is-open` node before **every** `send-to-queue`, paired with `callbackEnabled` and a low trigger position on the queue (IV-01).
+- Every key a prompt names has a matching `digit-N` edge; a key with no edge is a dead press. Read this one by eye — a `gather-input` declares no list of keys, so there is no list to check the edges against.
 - Every keyed `gather-input` has a `timeout` edge, for the caller who presses nothing.
 - No self edges. A wrong key already counts against `maxRetries`; a self edge loops the caller with no way out.
 - Never add a `language-selection` node only to change the voice. `say-message` and `gather-input` each carry their own `language` and `voice`.
@@ -83,8 +74,3 @@ One call per branch, and read each one back:
 - One call per language, if there is a language key. Check the language and the voice of every step, not only the first.
 - One call outside opening hours. The `false` branch of `is-open` runs.
 - One call that reaches `send-to-ai-agent`, to check the handover from the menu into the assistant.
-
-Then `publish_ivr_flows`, and `get_ivr_flows` and `list_voice_phone_numbers` for
-the counts, `publishedRevision`, `configured`, `syncedAt` and
-`provisioningError` (which must be null). Wait more
-than 30 seconds after a change before the first call that should read it.

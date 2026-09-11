@@ -38,17 +38,16 @@ Teams and call queues come before the stack can transfer anywhere.
 
 - **VO-01** AI voice feature = on. A voice create that answers 403 means it is off. Only Atender can turn it on. Stop and tell the customer.
 - **VO-02** One voice stack (`type: "voice"`), separate from the text stacks.
-- **VO-03** **Create the voice stack without `voiceLanguageVoices`.** The server fills the map with valid ids from its own catalogue. Read them back with `get_agent_stacks` and change one only if the customer wants a different voice. Do not ask the customer for ids, and do not take them from a docs page — you have no way to check an id you typed, and a wrong id breaks every call. Never copy `ttsVoice` or `voiceLanguages` from `list_voice_settings`: those are Amazon Polly names, for the phone menu's own nodes only.
+- **VO-03** **Create the voice stack without `voiceLanguageVoices`.** The server fills the map with valid ids from its own catalogue. No tool lists that catalogue, so never type, guess or copy an id from a docs page — a wrong id breaks every call in that language. Read the map back with `get_agent_stacks` and change an entry only if the customer wants a different voice. Never copy `ttsVoice` or `voiceLanguages` from `list_voice_settings`: those are Amazon Polly names, for the phone menu's own nodes only.
 - **VO-04** `voiceWelcomeGreetings` = one sentence for each key in VO-03: the company name, then what the line is for. Leave `voiceGreetingPrimaryLanguage` out. Nothing reads it.
 - **VO-05** `voicePace` = the customer's answer (default `balanced`).
-- **VO-06** Transfer target = `voiceFallbackQueueId` (one fixed queue), or `voiceHandoverAiTeam: true` (the AI picks among described teams), or the queues of `handoverTeamId`. A team with several queues needs a `description` on each queue. With no resolvable queue the stack has no transfer, and it must say so.
-- **VO-07** `voiceFallbackAction` = `queue` (with `voiceFallbackQueueId`) or `voicemail`, not the default `hangup`. A queue holds a caller with no ceiling, so set `callbackEnabled` on that queue with a low trigger position, and put an `is-open` node before every send-to-queue in the flow (IV-01).
+- **VO-06** Transfer target, first that resolves: `voiceFallbackQueueId` (one fixed queue), `voiceHandoverAiTeam: true` (the AI picks among teams whose queues carry a `description`), or the queues of `handoverTeamId`. Every candidate queue needs a `description`. With none resolvable the stack has no transfer, and the business rules must say so.
+- **VO-07** `voiceFallbackAction` = `queue` (with `voiceFallbackQueueId`) or `voicemail`, on purpose, not the default `hangup`. A queue holds a caller with no ceiling, so set `callbackEnabled` on that queue with a low trigger position and put an `is-open` node before every send-to-queue in the flow (IV-01).
 - **VO-08** Business rules on the voice stack only: one thing at a time, at most two short sentences; answer a question that comes with a yes; for an identifier, list what the caller has and let them choose by number; ask before you transfer (this is the only way to get ask-before-transfer on a call today); before ending, ask once if there is anything else; never say a filler such as "one moment".
 - **VO-09** Codes on a call follow `voiceCallerVerificationEnabled`. When it is false: never mention a code. When it is true: say a text is on its way only after the tool answered, then wait for the caller.
 - **VO-10** Bind the stack to the number: IV-06 in the `atender-ivr` skill.
 
-Field names, language-code forms and the transfer decision are in
-`references/voice-fields.md`.
+Language-code forms per field: `references/voice-fields.md`.
 
 <!-- site:skip -->
 ## What does not apply on a call today
@@ -78,21 +77,20 @@ voice; re-check the live schema.*
 ## Rules
 
 - The stack voice map has no fallback. An empty map — from a PATCH `null`, a type flip or a clone — makes every call hear "this number is unavailable".
-- Never promise a mechanism you have not proved on a call. The words the assistant says are not evidence that anything ran.
-- A voice setting change and a stack or number change are read by the first call more than 30 seconds later.
+- Never promise a mechanism you have not proved on a call. What the assistant says is not evidence that anything ran.
+- A voice, stack or number change is read by the first call more than 30 seconds later.
 - Never `create_conversations_inbound` to test a voice stack. It is an email path.
 - A test call is a real call that costs money. Get a yes before each one, and do not score the first call.
 
 ## Verify
 
-- Read `voiceLanguageVoices` back with `get_agent_stacks` after the create, and say which voice each language got.
+- `get_agent_stacks`: compare `voiceLanguageVoices`, `voiceWelcomeGreetings`, `voicePace`, `voiceFallbackAction` and the transfer target field by field, and say which voice each language got.
 - On each call check: the greeting (language, voice, not clipped); at most two sentences per turn; no talking over the caller; the question that comes with a yes is answered; nothing about the account before verification; a transfer reaches the queue named; the fallback path.
 - The transcript is what the caller heard. Compare Norwegian calls with Norwegian calls. Speech recognition treats the language as a bias, not a lock, so one wrong-language answer is not a setting fault.
 - A call writes no verification event. Report a call as not proved by event; read the event feed for the call as the record instead.
-- Read the stack back with `get_agent_stacks` and compare `voiceLanguageVoices`, `voiceWelcomeGreetings`, `voicePace`, `voiceFallbackAction` and the transfer target field by field.
 
 ## What must be done in the app
 
 Turning the AI voice feature on (Atender only, VO-01). Requesting a phone number,
-which costs money. Recording decisions about call recording, which is the
-customer's legal call. Tell the customer which of these are waiting on them.
+which costs money. Deciding about call recording, which is the customer's legal
+call. Tell the customer which are waiting on them.

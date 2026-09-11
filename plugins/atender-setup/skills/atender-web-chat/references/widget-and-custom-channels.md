@@ -12,9 +12,6 @@
 | `afterHoursMainAgentId` | The Agent Stack that answers outside the primary team's hours |
 | colours | Widget branding. The rest of the brand is `update_branding` |
 
-The widget is created with `create_chat_widget` and changed with
-`update_chat_widget`.
-
 <!-- site:skip -->
 ## Taking the AI off a widget
 
@@ -72,7 +69,7 @@ the customer for the real page.
 
 A custom channel carries a conversation inside the customer's own application.
 
-1. `create_channels` with `type: "custom"`, `mainAgentId` and `defaultTeamId`. Add a `webhookUrl` only if replies must be pushed somewhere.
+1. `create_channels` {`type: "custom"`, `mainAgentId`, `defaultTeamId`}. Add a `webhookUrl` only if replies must be pushed somewhere.
 2. Give the customer the `secret` once — it is shown once. Never ask them to paste it back into the chat.
 3. `test_channels` to prove the receiver before any message.
 4. `create_channels_messages` to send an inbound message. The reply goes to the channel's `webhookUrl` only, so it reaches no customer.
@@ -80,17 +77,14 @@ A custom channel carries a conversation inside the customer's own application.
 
 ### A pull channel, for testing
 
-Create the channel with **no `webhookUrl`**. There is then nowhere a reply can be
-pushed, so nothing can reach anybody. Send with `create_channels_messages` and
-read the whole trace back with `list_conversations_messages`,
-`list_conversation_events`, `list_routing_decisions` and
-`list_tool_execution_logs`. This is the safe test path the
-`atender-agent-stack-text` skill uses (TC-01). The conversation is real and
-counts in analytics.
+Create it with **no `webhookUrl`**: there is then nowhere a reply can be pushed.
+Send with `create_channels_messages` and read the trace back with
+`list_conversations_messages`, `list_conversation_events`,
+`list_routing_decisions` and `list_tool_execution_logs`. This is the safe test
+path (TC-01). The conversation is real and counts in analytics.
 
 Facts to hold on to:
 
 - A push channel turns itself off after 10 failed deliveries in a row. A resend counts as a new delivery. `update_channels` `isActive: true` turns it on again.
 - `rotate_secret_channels` issues a new secret and invalidates the old one.
 - `settings.verificationDelivery` = `contact`, unless the customer's application signs the customer in before the conversation opens; then they redact the six digits in their own logs.
-- A custom channel is the preferred path for test conversations, because no reply reaches a real customer.

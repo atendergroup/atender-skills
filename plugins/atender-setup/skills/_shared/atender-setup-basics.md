@@ -167,8 +167,7 @@ second brand's knowledge base; edit the portal layout.
 
 ## Groundwork: Handbook
 
-Knowledge Base is customer-facing and quotable. Handbook is internal instructions
-the AI follows and never quotes.
+Handbook is internal instructions the AI follows and never quotes.
 
 Goal: the internal rules exist as visible entries, in the handbook the stack
 reads, and every specialist that must follow them reads the Handbook.
@@ -182,21 +181,20 @@ said instead; the order of work for the situations they handle most.
 - **HB-03** Entry: `keywords` (max 10), `visibility: true`, `externalId` = a stable key. Match on `externalId`.
 - **HB-04** Change an entry with `update_handbook` by id. `import_handbook` skips an existing title and never updates.
 - **HB-05** Write each entry as an instruction to the AI: a limit is a number and an action the specialist cannot take, with who owns the work instead; an escalation is a criterion; every "never say X" has its "say this instead". No customer wording: that is the Knowledge Base.
-- **HB-06** Every specialist that must follow the Handbook reads `handbookEnabled: true` (the Agent Stacks text skill, SP-04, writes it). The default is false on purpose — the Handbook is internal and often empty — so a false value is only a gap on a specialist that must follow policy, never a fault in itself.
+- **HB-06** Every specialist that must follow the Handbook reads `handbookEnabled: true` (SP-04 writes it). The default is false on purpose, so a false value is a gap only on a specialist that must follow policy, never a fault in itself.
 - **HB-07** The source is a file the customer controls. Write the workspace from it. A live edit goes back into the file in the same session.
 - **HB-08** Read back each entry where the customer's answer was vague and you chose the words.
 
 Rules:
 
-- `visibility: false` hides an entry from the AI. It is the only gate the AI reads. Never set it false to make an entry internal: every entry is internal.
-- On a text channel, retrieval is gated per specialist: `kbEnabled` for the Knowledge Base and `handbookEnabled` for the Handbook. `knowledgeBaseEnabled` on the Agent Stack is a **voice** switch and gates nothing on text.
+- `visibility: false` hides an entry from the AI and is the only gate the AI reads. Never set it false to make an entry internal: every entry is internal.
+- Text retrieval is gated per specialist: `kbEnabled` for the Knowledge Base, `handbookEnabled` for the Handbook. `knowledgeBaseEnabled` on the Agent Stack is a **voice** switch and gates nothing on text.
 - Access rules (confidential, scope to a stack) do not change what the AI reads today. Do not use them to restrict the AI.
 - A rule in the Handbook and in specialist instructions is two sources. Report it and ask which one stays.
 
 Verify:
 
 - `list_handbook`: every entry once, `visibility: true`, `externalId` set, right `handbookId`.
-- Every specialist that needs policy reads `handbookEnabled: true`.
 - For every "do X" rule, a specialist on the stack holds a tool that does X. Show the gaps before you change wording.
 - File and workspace match, field by field.
 

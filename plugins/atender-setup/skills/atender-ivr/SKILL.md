@@ -41,21 +41,18 @@ caller hears today.
 
 ## Checklist
 
-- **IV-01** Queues first, always: `create_voice_call_queues` **before** `create_ivr_flows`. One queue per team, each with a `description` (the assistant routes only to described queues). Set `holdAudioType` and `reservationTimeout` as agreed, and set **`callbackEnabled` with a low trigger position** — a queue holds a caller with no ceiling and there is no maximum hold time to set, so the call back is the only way out of a long wait.
+- **IV-01** Queues first, always: `create_voice_call_queues` **before** `create_ivr_flows` — a flow saves with 201 without one and the number then never syncs. One queue per team, each with a `description` (the assistant routes only to described queues). `holdAudioType` and `reservationTimeout` as agreed, and **`callbackEnabled` with a low trigger position**: a queue holds a caller with no ceiling and there is no maximum hold time, so the call back is the only way out.
 - **IV-02** Number: `phoneNumber` starts with `+`, `capabilities.voice` is true, and there is one row per number in `list_voice_phone_numbers`. If not, stop.
 - **IV-03** `create_ivr_flows`: `ttsLanguage` (BCP-47) and `ttsVoice` (a Polly name). No `welcomeMessage`.
 - **IV-04** Definition: `update_ivr_flows_definition` with the whole graph, written before the bind. The node types, their required data and the edge handles are in `references/flow-graph.md`.
-- **IV-05** Check the graph yourself. The validator does not check it: every keyed menu has a `timeout` edge, there are no self edges, every `send-to-queue` has an `is-open` node before it, and the node and edge counts match what you sent. There is no per-key check to run — a `gather-input` declares no list of keys, so there is nothing to compare the `digit-N` edges against. Read the prompt text instead and make sure each key it names has an edge.
+- **IV-05** Check the graph yourself: the validator checks none of it. Walk the list in `references/flow-graph.md`, and confirm the node and edge counts match what you sent.
 - **IV-06** Bind: `update_voice_phone_numbers` with `ivrFlowId`, `mainAgentId` and `defaultAgentLanguage` in one call. If `provider.configured` is false, call `create_voice_phone_numbers_provision` once. On a 409, stop and tell the customer.
 - **IV-07** Publish: after **every** `update_ivr_flows_definition`, call `publish_ivr_flows` with a comment and then check `provisioningError` is null. An unpublished definition changes nothing a caller hears, and a publish that left `provisioningError` set has not reached the carrier.
 
 ## Rules
 
-- Never draw a self edge. A wrong key already counts as a miss, and a self edge makes a caller loop with no way out.
-- Never add a `language-selection` node only to change the voice. Set `language` and `voice` on the node instead.
-- A queue holds a caller with no ceiling; there is no maximum hold time. Both guards are needed: `callbackEnabled` with a low trigger position on the queue, and an `is-open` node before every `send-to-queue`.
-- Check what a number is before you diagnose anything after it. One row, `+` prefix, `capabilities.voice` true.
-- A write is live on a bound number. Write the definition before the bind. Every definition write is followed by a `publish_ivr_flows` and a `provisioningError` check — otherwise the change is stored and never heard.
+- Check what a number is before you diagnose anything after it: one row, `+` prefix, `capabilities.voice` true.
+- A write is live on a bound number. Write the definition before the bind.
 - After a change to a number, a stack or a flow, the first call more than 30 seconds later reads the change.
 - The greeting is at most two sentences: who we are, what the line is for, then the first choice.
 - A test call is a real call that costs money. Get a yes before each one, and do not score the first call.
@@ -65,10 +62,10 @@ caller hears today.
 - `get_ivr_flows`: the node and edge counts match what you sent, and `publishedRevision` is set.
 - `list_voice_phone_numbers`: `ivrFlowId`, `configured` true, a recent `syncedAt`, `provisioningError` null.
 - `list_voice_call_queues`: every queue that the flow or the voice stack routes to has a `description`.
-- One script per branch: every key, one wrong key, one call that presses nothing, each language, and out of hours. Check the language and voice of each step, and where the call lands. The test script is in `references/flow-graph.md`.
+- One call per branch, from the test script in `references/flow-graph.md`.
 
 ## What must be done in the app
 
 Requesting a phone number, which costs money. Deciding whether calls are
 recorded, which is the customer's legal call. Turning the AI voice feature on,
-which only Atender can do. Tell the customer which of these are waiting on them.
+which only Atender can do. Tell the customer which are waiting on them.

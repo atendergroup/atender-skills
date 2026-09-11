@@ -39,17 +39,17 @@ specialists that will hold the tools come before the attach.
 
 ## Checklist
 
-- **CA-01** `create_api_definitions_parse`, then `create_api_definitions` with `name`, `baseUrl`, `authMode`, `authType`, `endpoints`. If the spec is too large, trim response schemas only.
+- **CA-01** `create_api_definitions_parse`, then `create_api_definitions` {`name`, `baseUrl`, `authMode`, `authType`, `endpoints`}. Spec limit 1 MB; if it is too large, trim response schemas only.
 - **CA-02** Each request body is `{contentType, schema}`, an OpenAPI `requestBody`, or a JSON Schema. Any other shape gives the model no `body` argument.
 - **CA-03** Add missing operations with `create_api_definitions_endpoints`.
-- **CA-04** Before any tier above `read`, set `authModeConfig` with `update_api_definitions`: `sessionVariableMapping`, `claimVariableMapping` (after a code the claim is the verified email or E.164 phone), `resourceOwnership` {`resourceKeys` = argument names, `lookup.path` with a `{{variable}}`, `lookup.identifierPaths`}. If the API cannot take that handle, check the live schema for `accountVerification`; if present, set it (unconfirmed on 2026-09-10; prove one bound call before you rely on it).
-- **CA-05** Run `test_api_definitions_redaction` on a real sample response, then write `redactionRules`, `redactionApplyDefaults`, `redactionCustomFields`.
+- **CA-04** Before any tier above `read`, set `authModeConfig` with `update_api_definitions`: `sessionVariableMapping`, `claimVariableMapping` (after a code the claim is the verified email or E.164 phone) and `resourceOwnership` (`references/identity-model.md`). If the API cannot take that handle, check the live schema for `accountVerification`; if present, set it (unconfirmed on 2026-09-10; prove one bound call before you rely on it).
+- **CA-05** `test_api_definitions_redaction` on a real sample response, then write `redactionRules`, `redactionApplyDefaults`, `redactionCustomFields`.
 - **CA-06** `create_capabilities` for each operation: `name`, `displayName`, `description`, `usageGuidance` (when to call it, which inputs, what the answer means), `isSimpleTool: true`, `simpleToolConfig` {`actionType: "api_call"`, `apiDefinitionId`, `endpointId`}, `actionTier`.
-- **CA-07** `actionTier`: see the tier table in `references/tiers-and-changes.md`. Do not send `securityLevel`. Set `ownershipExempt: true` only when the operation names nothing a customer owns.
+- **CA-07** `actionTier`: the tier table in `references/tiers-and-changes.md`. Do not send `securityLevel`. `ownershipExempt: true` only when the operation names nothing a customer owns.
 - **CA-08** Show the customer a table: operation, tier, consequence, specialists.
 - **CA-09** `publish_capabilities`. Fix each failed item, then publish again.
 - **CA-10** `create_specialists_tools` with `toolId` = the Capability id, only where it is needed.
-- **CA-11** To change a live Capability: see the change matrix in `references/tiers-and-changes.md`.
+- **CA-11** Changing a live Capability: the change matrix in `references/tiers-and-changes.md`.
 - **CA-12** Every "do X" rule has a specialist that holds the tool for X. A specialist that must choose one of several items holds the tool that lists them.
 
 The identity model — session mapping, claim mapping, resource ownership — is in
@@ -57,15 +57,12 @@ The identity model — session mapping, claim mapping, resource ownership — is
 
 ## Rules
 
-- Identity comes only from the verified session. Never from the contact or the conversation.
-- A resource key names an argument, not a field in the answer. A connection holds one ownership rule.
 - A mapped argument is filled only after verification, so the Brief says: verify first.
 - A refresh of the documentation deletes the non-manual endpoints that left the spec.
-- The publish checklist runs only when a Capability becomes published. After a connection change, unpublish and publish one Capability to run it again.
+- The publish checklist runs only on the transition to `published`. After a connection change, unpublish and publish one Capability to run it again.
 - Unpublish removes the tool from every specialist and keeps the assignments.
-- If a refusal names a Capability that is attached and published, check the assignment once, then report a platform fault. The gap is the runtime tool surface, not the wording.
 - A create with status `published` is refused. Create, then publish.
-- Read a refusal properly: the code and `details` name the failing item.
+- A refusal that names an attached, published Capability is a platform fault, not wording: check the assignment once, then report it. The code and `details` name the failing item.
 
 ## Verify
 
@@ -73,10 +70,9 @@ The identity model — session mapping, claim mapping, resource ownership — is
 - `get_agent_tools` on `agentToolId`: `description` and `inputSchema` are what the model reads.
 - `list_specialists_tools` matches the table from CA-08.
 - After a real conversation, `list_tool_execution_logs` with `conversationId` shows `success` and the `inputPayload`, then `get_tool_execution_logs` for the detail. A reply that says "done" is not proof.
-- Every action a Brief promises has a published, attached tool.
 
 ## What must be done in the app
 
 Entering the real credential — never in the chat. Connecting another MCP server
-or a code repository, which has no API. Tell the customer which of these are
-waiting on them, and where.
+or a code repository, which has no API. Tell the customer which are waiting on
+them, and where.

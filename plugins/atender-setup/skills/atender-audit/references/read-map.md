@@ -1,16 +1,16 @@
 # What to read, area by area
 
-One call per line, at most one every 2 seconds. Every line gets a result in the
-report: a value, a 403 (unreadable) or a 404 (a module that may be off).
+One call per line, at most one every 2 seconds. Every line gets a result: a
+value, a 403 (unreadable) or a 404 (a module that may be off).
 
 ## Groundwork
 
 | Read | What it tells you |
 | --- | --- |
-| `list_teams` | Every team and its members |
+| `list_teams` | Teams and their members |
 | `list_users` | Only people already in a team |
-| `list_tags` | Conversation tags and their auto-tag fields |
-| `list_opening_hours_rules` | Named schedules, their timezone, which is `isDefault` |
+| `list_tags` | Conversation tags, with their auto-tag fields |
+| `list_opening_hours_rules` | Schedules, `timezone`, which is `isDefault` |
 | `list_opening_hours_assignments` | Which team and channel pair uses which rule |
 | `get_opening_hours` | The week as it stands |
 
@@ -44,11 +44,11 @@ report: a value, a 403 (unreadable) or a 404 (a module that may be off).
 
 | Read | What it tells you |
 | --- | --- |
-| `list_capabilities`, `get_capabilities` | Tier, status, which stacks and specialists hold it |
-| `list_api_definitions`, `get_api_definitions` | The customer's own API, its auth and its documentation |
-| `list_api_definitions_endpoints`, `list_api_definitions_endpoints_commands` | The endpoints and the commands built on them |
+| `list_capabilities`, `get_capabilities` | Tier, status, who holds it |
+| `list_api_definitions`, `get_api_definitions` | The customer's API, its auth, its documentation |
+| `list_api_definitions_endpoints`, `list_api_definitions_endpoints_commands` | Endpoints and the commands built on them |
 | `list_agent_tools`, `get_agent_tools` | The tools an assistant can call |
-| `list_tool_execution_logs` | Whether a tool has ever run, and what it answered |
+| `list_tool_execution_logs` | Whether a tool has run, and what it answered |
 
 ## Channels
 
@@ -56,10 +56,10 @@ report: a value, a 403 (unreadable) or a 404 (a module that may be off).
 | --- | --- |
 | `list_channels`, `get_channels` | Custom channels, `mainAgentId`, `isActive` |
 | `list_email_channels` | Inboxes, `mainAgentId`, `teamId`, status |
-| `list_email_domains` | Sending domains and whether each record is `valid` |
+| `list_email_domains` | Sending domains, and whether each record is `valid` |
 | `list_chat_widgets`, `get_chat_widget` | `aliMainAgentId`, `defaultTeamId`, languages, messages |
 | `list_channel_deliveries` | Whether a push channel is delivering |
-| `get_sms_settings`, `list_sms_numbers` | The sender name and the numbers |
+| `get_sms_settings`, `list_sms_numbers` | `senderName` and the numbers |
 | `list_custom_domains` | Hostnames and their status |
 
 ## Voice
@@ -69,13 +69,13 @@ report: a value, a 403 (unreadable) or a 404 (a module that may be off).
 | `list_voice_settings` | Whether the voice feature is on |
 | `list_voice_phone_numbers` | Numbers and what each is bound to |
 | `list_voice_call_queues` | Queues, and whether there are any at all |
-| `list_ivr_flows`, `get_ivr_flows` | The flow graph, its edges and whether it is published |
+| `list_ivr_flows`, `get_ivr_flows` | The graph, its edges, `publishedRevision` |
 
 ## Brand and the rest
 
 | Read | What it tells you |
 | --- | --- |
-| `list_branding` | Logo and the six colours |
+| `list_branding` | Logo and colours |
 | `get_email_brand_settings` | The brand on outgoing email |
 | `list_incidents_settings`, `list_incidents_components` | The status page and its components |
 | `get_csat_settings` | The survey, its switches and its look |

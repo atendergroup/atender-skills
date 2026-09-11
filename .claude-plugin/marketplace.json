@@ -10,7 +10,7 @@
       "name": "atender-setup",
       "source": "./plugins/atender-setup",
       "description": "Set up or audit an Atender workspace over the Atender MCP server — Agent Stacks for text and voice, Capabilities, the chat widget, email and the phone menu.",
-      "version": "0.2.2",
+      "version": "0.3.0",
       "category": "setup",
       "tags": [
         "atender",
