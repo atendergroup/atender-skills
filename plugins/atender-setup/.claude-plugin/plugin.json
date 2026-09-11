@@ -1,6 +1,6 @@
 {
   "name": "atender-setup",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Set up an Atender workspace over the Atender MCP server — Agent Stacks (text and voice), Capabilities, the chat widget, email and the phone menu — against tested checklists.",
   "author": {
     "name": "Atender",

@@ -31,7 +31,7 @@ questions the other skills would otherwise ask.
 - Whatever is already written down: a brand guide, a zip, a folder, a website address, or answers in chat.
 - The groups of people who answer customers, and who is in each.
 - The subjects they want to filter conversations by.
-- Opening hours per team and channel, with the timezone as an IANA name (`Europe/Oslo`) and the holiday country.
+- Opening hours per team and channel, the holiday country, and the `timezone` those hours are in as an IANA name (`Europe/Oslo`). Ask for the timezone. Never assume it.
 - Whether they want a satisfaction survey, and a name to send SMS from.
 
 ## Checklist: the company profile
@@ -68,6 +68,7 @@ Fields, patterns and defaults per surface: `references/brand-surfaces.md`.
 - **WS-22** SMS sender name: `update_sms_settings` {`senderName`}, 3 to 11 letters and digits with at least one letter. `null` puts every message back on the workspace number.
 - **WS-23** Signature: `set_default_signature` writes it for the person whose API key this is. Say so before you write it.
 - **WS-24** Users: `list_users` only. An invite happens in the app, and before that person can be a team member.
+- **WS-25** Ask the customer for the timezone as an IANA name (`Europe/Oslo`) before the first `create_opening_hours_rule` or `set_opening_hours`, and send that answer in `timezone` on every rule. Then read every rule back with `list_opening_hours_rules` or `get_opening_hours_rule` and check each `timezone` equals the answer. A rule that reads `UTC` for a customer who did not say UTC is wrong by the offset.
 
 ## Rules
 
@@ -76,6 +77,7 @@ Fields, patterns and defaults per surface: `references/brand-surfaces.md`.
 - A second `create_tags` with an existing name answers 500 and makes nothing. List again; do not retry.
 - Tags made here never auto-tag. `list_users` shows only people already in a team; say so when someone named is missing.
 - Teams cannot be deleted here. Tags can, with `delete_tags`; ask first.
+- Never omit `timezone` on an opening-hours write. The API stores `UTC` in silence, and every open-or-closed decision reads the rule's own timezone: handover deferral, the IVR `is-open` node and voice after hours.
 - Never overwrite a logo, colour, team or tag that already has a value unless the customer says yes to that object by name.
 
 ## Verify
@@ -85,7 +87,9 @@ Read every setting back with its own tool — `list_branding`,
 `list_incidents_settings`, `get_csat_settings`, `list_custom_domains`,
 `list_teams`, `list_tags`, `list_opening_hours_rules`,
 `list_opening_hours_assignments`, `get_sms_settings`, `get_default_signature` —
-and compare field by field with the plan.
+and compare field by field with the plan. On every opening-hours rule, check
+`timezone` against the customer's answer by name; `UTC` where the customer named
+another zone is a fault, not a default.
 
 Then one screen: each surface on a line, the logo and colours it now carries,
 and the surfaces still on the product's own colours. Open the Knowledge Base
