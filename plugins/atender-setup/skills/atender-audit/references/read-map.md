@@ -31,7 +31,7 @@ report: a value, a 403 (unreadable) or a 404 (a module that may be off).
 
 | Read | What it tells you |
 | --- | --- |
-| `list_agent_stacks`, `get_agent_stacks` | `type`, `enabled`, `catchAllSpecialistId`, `kbPartitionId`, `handbookPartitionId`, `knowledgeBaseEnabled`, handover fields, personality, and the voice fields including `voiceLanguageVoices` |
+| `list_agent_stacks`, `get_agent_stacks` | `type`, `enabled`, `catchAllSpecialistId`, `kbPartitionId`, `handbookPartitionId`, `knowledgeBaseEnabled` (voice only), handover fields, personality, and the voice fields including `voiceLanguageVoices` |
 | `list_agent_stacks_members` | Members and whether each is enabled |
 | `get_agent_stack_orchestrator` | `systemPrompt` and `resolvedSource` |
 | `list_agent_stack_prerequisites` | What the stack asks for before it answers |

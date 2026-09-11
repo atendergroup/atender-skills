@@ -39,18 +39,18 @@ Teams, tags, the Knowledge Base and the Handbook come before anything here.
 
 ## Checklist: the stack
 
-- **AS-01** Inventory. Per stack: `name`, `type`, `enabled`, `catchAllSpecialistId`, members and whether each is enabled, `kbPartitionId`, `handbookPartitionId`, `knowledgeBaseEnabled`, orchestrator `resolvedSource`. Say which channels, email channels, phone numbers and SMS numbers name it in `mainAgentId`. Report a stack nothing points at.
+- **AS-01** Inventory. Per stack: `name`, `type`, `enabled`, `catchAllSpecialistId`, members and whether each is enabled, `kbPartitionId`, `handbookPartitionId`, `knowledgeBaseEnabled` (voice only — see AS-05), orchestrator `resolvedSource`. Say which channels, email channels, phone numbers and SMS numbers name it in `mainAgentId`. Report a stack nothing points at.
 - **AS-02** Stack count = one per job, not one per channel. Voice gets its own stack.
-- **AS-03** `create_agent_stacks`: `name` (unique, the natural key), `type`, `enabled: false`. The default is true, so a stack is live from its create call.
+- **AS-03** `create_agent_stacks`: `name` (unique, the natural key), `type`, `enabled: false`. The default is true, so a stack is live from its create call. The order is fixed: **create with `enabled: false`, add the specialists and the members, bind the channel, and only then `enable_agent_stacks`.** A stack enabled earlier answers customers with no members and no channel behind it.
 - **AS-04** `kbPartitionId` and `handbookPartitionId` = explicit ids from the partition lists, even if there is one of each. A later `kbPartitionId` change drops the members' category limits.
-- **AS-05** `knowledgeBaseEnabled: true`. Text reads the specialists' switches (SP-04).
+- **AS-05** `knowledgeBaseEnabled` on the stack is a **voice** switch. It gates nothing on a text channel: text retrieval is gated per specialist by `kbEnabled` (Knowledge Base) and `handbookEnabled` (Handbook), which SP-04 writes. Do not set `knowledgeBaseEnabled` on a text stack expecting it to turn retrieval on, and do not report it as a fault on a text stack.
 - **AS-06** Before any member is added: each specialist exists, is enabled, and has its final description (SP-03).
 - **AS-07** `create_agent_stacks_members` {`agentId`, `role: "agent"`}, one call each, the intended catch-all first. The first enabled specialist added becomes the catch-all.
 - **AS-08** The orchestrator routes on each member's description. It must be final before the add.
 - **AS-09** `catchAllSpecialistId` = the intended specialist. To correct it: `update_agent_stacks` {`catchAllSpecialistId`}. It must be an enabled member.
 - **AS-10** Orchestrator: read first. Write `update_agent_stack_orchestrator` {`systemPrompt`} only for stack-wide routing criteria the descriptions cannot carry. It adds to the built-in prompt.
 - **AS-11** Handover, verification, personality and specialists: `references/specialists-and-personality.md` and `references/handover-and-verification.md`.
-- **AS-12** Enable gate. The route checks nothing, so you check: AS-03 to AS-11 done, the specialists of SP-03 and SP-04 in place, HO-01 and HO-02 set, one channel bound to this stack, and one test conversation passed (TC-01). Then `enable_agent_stacks`. Way out: `disable_agent_stacks`.
+- **AS-12** Enable gate, last. The route checks nothing, so you check: AS-03 to AS-11 done, the specialists of SP-03 and SP-04 in place, HO-01 and HO-02 set, one channel bound to this stack, and one test conversation passed (TC-01). Then `enable_agent_stacks`. Way out: `disable_agent_stacks`.
 
 ### The minimum a lone stack needs
 
@@ -60,15 +60,27 @@ When the run covers the stack and nothing else, it still has to be complete:
 - **AS-M2** A handover target, in one `update_agent_stacks` call before the enable: `handoverMode: "explicit_team"`, `handoverTeamId` = a team from `list_teams` (`create_teams` if there is none), `handoverAskConfirmation: true`. If the customer says there is no handover yet, state `handoverMode: "never"` explicitly and report AS-M2 as a gap: the stack then never gives a conversation to a person.
 - **AS-M3** One channel bound to this stack, with the customer's yes: `update_email_channels` {`mainAgentId`}, `update_chat_widget` {`aliMainAgentId`}, or `create_channels` / `update_channels` {`mainAgentId`}. Say which stack each channel leaves. If there is no channel yet, report AS-M3 as a gap: nothing reaches the stack.
 
-### The safe enable test
+### The safe enable test, and how to read a trace
 
-With no test area in the run, one of these proves the stack without reaching a
-customer: a custom channel whose `mainAgentId` is this stack, checked with
-`test_channels` first, then `create_channels_messages`, so no reply reaches a
-customer; or `test_specialists` {`mainAgentId` = this stack} on three real
-situations, which reads wording and routing only, proves no handover, and runs
-real level-0 tools. Never `create_conversations_inbound` here: every AI reply is
-a real email.
+The safe path is a **pull channel**: a custom channel with no webhook, so there
+is nowhere a reply can be pushed and nothing can reach a customer. In order:
+
+1. `create_teams` (or an existing team).
+2. `create_agent_stacks` with `enabled: false`.
+3. Build it: specialists, members, catch-all, personality, handover.
+4. `enable_agent_stacks`.
+5. `create_channels` with `type: "custom"`, `mainAgentId` = this stack, `defaultTeamId`, and **no `webhookUrl`**.
+6. `create_channels_messages` to send the customer's first message.
+7. Read the trace back: `list_conversations_messages`, `list_conversation_events`, `list_routing_decisions` and `list_tool_execution_logs`.
+
+That trace is the record of what the stack did — which specialist answered, with
+what confidence, which tools ran and what they returned. The conversation is
+real and counts in analytics, so keep the batch small and tag it.
+
+The lighter alternative is `test_specialists` {`mainAgentId` = this stack} on
+three real situations: wording and routing only, no conversation, no handover
+commit, no routing decision. Never `create_conversations_inbound` here: every AI
+reply is a real email.
 
 ## The other checklists
 

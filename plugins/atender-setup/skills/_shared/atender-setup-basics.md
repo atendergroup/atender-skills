@@ -5,7 +5,7 @@ to connect, who wins when sources disagree, the order of work, the preflight,
 pacing, the report format, and the two groundwork areas (Knowledge Base,
 Handbook) that no single skill owns.
 
-Evidence date of the content in these skills: 2026-09-10. Anything marked
+Evidence date of the content in these skills: 2026-09-11. Anything marked
 unconfirmed below is not a fact — check the live schema before you rely on it.
 
 ## What the Atender MCP is
@@ -66,7 +66,7 @@ This order wins over any other order you read. Why each step is where it is:
 - Knowledge Base and Handbook before the stack answers anybody.
 - Capability: endpoint, then capability, then publish, then attach. A create with status published is refused.
 - Verification settings before any Capability above the read tier.
-- Opening hours before the opening-hours handover switch.
+- Opening hours before the opening-hours handover switch. Always send `timezone` as an IANA name such as `Europe/Oslo`; the default is UTC.
 - Call queues before an IVR flow; the number after both. Without a queue the write answers 201 and the number never syncs.
 
 If an area needs an earlier step that does not exist, add it to the plan or
@@ -182,13 +182,14 @@ said instead; the order of work for the situations they handle most.
 - **HB-03** Entry: `keywords` (max 10), `visibility: true`, `externalId` = a stable key. Match on `externalId`.
 - **HB-04** Change an entry with `update_handbook` by id. `import_handbook` skips an existing title and never updates.
 - **HB-05** Write each entry as an instruction to the AI: a limit is a number and an action the specialist cannot take, with who owns the work instead; an escalation is a criterion; every "never say X" has its "say this instead". No customer wording: that is the Knowledge Base.
-- **HB-06** Every specialist that must follow the Handbook reads `handbookEnabled: true` (the Agent Stacks text skill, SP-04, writes it).
+- **HB-06** Every specialist that must follow the Handbook reads `handbookEnabled: true` (the Agent Stacks text skill, SP-04, writes it). The default is false on purpose — the Handbook is internal and often empty — so a false value is only a gap on a specialist that must follow policy, never a fault in itself.
 - **HB-07** The source is a file the customer controls. Write the workspace from it. A live edit goes back into the file in the same session.
 - **HB-08** Read back each entry where the customer's answer was vague and you chose the words.
 
 Rules:
 
 - `visibility: false` hides an entry from the AI. It is the only gate the AI reads. Never set it false to make an entry internal: every entry is internal.
+- On a text channel, retrieval is gated per specialist: `kbEnabled` for the Knowledge Base and `handbookEnabled` for the Handbook. `knowledgeBaseEnabled` on the Agent Stack is a **voice** switch and gates nothing on text.
 - Access rules (confidential, scope to a stack) do not change what the AI reads today. Do not use them to restrict the AI.
 - A rule in the Handbook and in specialist instructions is two sources. Report it and ask which one stays.
 

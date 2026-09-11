@@ -10,9 +10,10 @@ every test contact, for example `qa+01@yourdomain`.
 
 - **TC-01** Pick the path for each situation, and say what it cannot reach.
   - a) `test_specialists` (`mainAgentId` = a stack the specialist is in; `conversationHistory` for later turns). It runs the router, specialist, output guardrails and real level-0 tools. No conversation, level 0, no handover commit, no routing decision. Wording checks only.
-  - b) A custom channel with `mainAgentId`: `create_channels_messages`, with one `externalConversationId` per run. The reply goes to the channel's `webhookUrl` only. Check the receiver first with `test_channels`. This is the preferred proof.
+  - b) **A pull channel — the preferred proof, and the way to read a trace.** `create_channels` with `type: "custom"`, `mainAgentId`, `defaultTeamId` and **no** `webhookUrl`. With no webhook there is nowhere for a reply to be pushed, so nothing can reach a customer; you read the reply back instead. Send with `create_channels_messages`, one `externalConversationId` per run. Read back with `list_conversations_messages` (the reply in full), `list_conversation_events`, `list_routing_decisions` (specialist, confidence, guardrails) and `list_tool_execution_logs` (every tool call the turn made). That set is the trace. The conversation is real: it counts in analytics, CSAT and billing, so keep the batch small.
+  - b2) A custom channel that does have a `webhookUrl`: the reply goes to that receiver only. Check it first with `test_channels`. Use this when the customer wants the delivery path proved too.
   - c) Email: `create_conversations_inbound` with `emailChannelId` = an inbox with a stack, then `append_conversation_customer_message` for each later turn. Every AI reply is a real email to `contact.email`.
-  - You cannot reach these over MCP: the chat widget, SMS, WhatsApp, Messenger, voice, test-marked conversations and the Agent Stack trace.
+  - You cannot reach these over MCP: the chat widget, SMS, WhatsApp, Messenger, voice, and test-marked conversations. The trace itself is readable — take it from the four read calls in (b).
 - **TC-02** Every `contact.email` or `sender.email` = a test mailbox the customer controls. Never a customer's address.
 - **TC-03** Tags = one general test tag plus one per situation, created before the first run. Send them in `tags` on `create_conversations_inbound`. On a custom channel, set them with `update_conversations`.
 - **TC-04** A new `externalReference`, `externalConversationId` and message `externalId` for each run. A repeated key returns the old result and runs no turn.
@@ -20,7 +21,7 @@ every test contact, for example `qa+01@yourdomain`.
 - **TC-06** Stage the account data the questions need, immediately before the run.
 - **TC-07** 3 runs per situation.
 - **TC-08** After each turn, poll `list_conversations_messages` with bounded retries. `agentStack: "queued"` is not a reply.
-- **TC-09** Read back each run: `list_conversations_messages` (the reply in full), `get_conversations` (`handover`), `list_conversation_events`, `list_routing_decisions?conversationId=` (specialist, confidence, tools, guardrail results), `list_tool_execution_logs?conversationId=` then `get_tool_execution_logs`.
+- **TC-09** Read back each run, always all five: `list_conversations_messages` (the reply in full), `get_conversations` (`handover`), `list_conversation_events`, `list_routing_decisions?conversationId=` (specialist, confidence, tools, guardrail results), `list_tool_execution_logs?conversationId=` then `get_tool_execution_logs`. Together these are the trace.
 - **TC-10** Match each date, amount, address or action in a reply to a tool call or a tool log. List each claim that has no record.
 - **TC-11** Review tone: quote, fault, and the setting or Brief that made it. Faults: one block, not paragraphs; passive with nobody in it; key point last; a feeling named back; an unasked exclusion; a date, time, address or amount no tool returned; the wrong language; a handover offer with no criterion met. Before you write a language rule, check that the sentence is the customer's and not platform text.
 - **TC-12** One fix per re-run. Show before and after side by side.
@@ -28,7 +29,7 @@ every test contact, for example `qa+01@yourdomain`.
 
 Rules:
 
-- Conversations made with `create_conversations_inbound` count in analytics, CSAT and billing. Keep the batch small.
+- Every test conversation is a real conversation — a pull channel one as much as an inbound email one. They count in analytics, CSAT and billing. Keep the batch small and tag them (TC-03).
 - A harness never matches exact wording, and never answers a question the customer already answered.
 - Demo: the presenter's own phone and email = one contact, renamed, not a second record. Present with a card of the identifiers.
 

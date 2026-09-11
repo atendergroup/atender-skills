@@ -28,7 +28,7 @@ Teams and call queues come before the stack can transfer anywhere.
 
 ## Needs from the customer (or from `atender-profile.md`)
 
-- A voice for each language, chosen from the Atender catalogue.
+- Which languages the line answers in. Not the voice ids — the server picks those (VO-03); ask only whether the voice it picked is the one they want.
 - The first sentence a caller hears, for each language.
 - Pace: fast, normal or patient.
 - What happens when the assistant cannot help: a queue, voicemail or hang up.
@@ -38,12 +38,12 @@ Teams and call queues come before the stack can transfer anywhere.
 
 - **VO-01** AI voice feature = on. A voice create that answers 403 means it is off. Only Atender can turn it on. Stop and tell the customer.
 - **VO-02** One voice stack (`type: "voice"`), separate from the text stacks.
-- **VO-03** `voiceLanguageVoices` at create = one ElevenLabs id for each language, keyed `no`, `sv`, `da`, `en`, `de` or `fr`, primary language first. Take ids only from the Atender catalogue (atender.com/docs, or ask the customer). Never copy `ttsVoice` or `voiceLanguages` from the voice settings: those are Polly names, for voice flows only.
+- **VO-03** **Create the voice stack without `voiceLanguageVoices`.** The server fills the map with valid ids from its own catalogue. Read them back with `get_agent_stacks` and change one only if the customer wants a different voice. Do not ask the customer for ids, and do not take them from a docs page — you have no way to check an id you typed, and a wrong id breaks every call. Never copy `ttsVoice` or `voiceLanguages` from `list_voice_settings`: those are Amazon Polly names, for the phone menu's own nodes only.
 - **VO-04** `voiceWelcomeGreetings` = one sentence for each key in VO-03: the company name, then what the line is for. Leave `voiceGreetingPrimaryLanguage` out. Nothing reads it.
 - **VO-05** `voicePace` = the customer's answer (default `balanced`).
 - **VO-06** Transfer target = `voiceFallbackQueueId` (one fixed queue), or `voiceHandoverAiTeam: true` (the AI picks among described teams), or the queues of `handoverTeamId`. A team with several queues needs a `description` on each queue. With no resolvable queue the stack has no transfer, and it must say so.
-- **VO-07** `voiceFallbackAction` = `queue` (with `voiceFallbackQueueId`) or `voicemail`, not the default `hangup`.
-- **VO-08** Business rules on the voice stack only: one thing at a time, at most two short sentences; answer a question that comes with a yes; for an identifier, list what the caller has and let them choose by number; ask before you transfer; before ending, ask once if there is anything else; never say a filler such as "one moment".
+- **VO-07** `voiceFallbackAction` = `queue` (with `voiceFallbackQueueId`) or `voicemail`, not the default `hangup`. A queue holds a caller with no ceiling, so set `callbackEnabled` on that queue with a low trigger position, and put an `is-open` node before every send-to-queue in the flow (IV-01).
+- **VO-08** Business rules on the voice stack only: one thing at a time, at most two short sentences; answer a question that comes with a yes; for an identifier, list what the caller has and let them choose by number; ask before you transfer (this is the only way to get ask-before-transfer on a call today); before ending, ask once if there is anything else; never say a filler such as "one moment".
 - **VO-09** Codes on a call follow `voiceCallerVerificationEnabled`. When it is false: never mention a code. When it is true: say a text is on its way only after the tool answered, then wait for the caller.
 - **VO-10** Bind the stack to the number: IV-06 in the `atender-ivr` skill.
 
@@ -59,13 +59,20 @@ call: `handoverInstructions`, `handoverWhenUnsure`, `handoverAskConfirmation`
 `handoverOfferCloseAndReturn`, `handoverCheckOpeningHours`, the handover
 required-information rows, and stack prerequisites.
 
-Erik has ruled that these should become tenant settings on voice too. Check the
-live schema on `create_agent_stacks` and `update_agent_stacks` before you tell a
-customer any of them is inert — if the schema now reads them on voice, follow the
-schema and say so. Do not store a setting that has no effect on the channel.
+Check the live schema on `create_agent_stacks` and `update_agent_stacks` before
+you tell a customer any of them is inert — if the schema now reads them on voice,
+follow the schema and say so. Do not store a setting that has no effect on the
+channel.
 
-Instead of `handoverAskConfirmation`, the ask-before-transfer behaviour is a
-business rule in VO-08 today.
+*This changes when the app ships these as tenant settings on voice; re-check the
+live schema.*
+
+`handoverAskConfirmation` is not read on a call today. To make the assistant ask
+before it transfers, write the confirmation rule into the voice stack's
+personality `businessRules` (VO-08). That is the only place it takes effect.
+
+*This changes when the app ships ask-before-transfer as a tenant setting on
+voice; re-check the live schema.*
 
 ## Rules
 
@@ -77,6 +84,7 @@ business rule in VO-08 today.
 
 ## Verify
 
+- Read `voiceLanguageVoices` back with `get_agent_stacks` after the create, and say which voice each language got.
 - On each call check: the greeting (language, voice, not clipped); at most two sentences per turn; no talking over the caller; the question that comes with a yes is answered; nothing about the account before verification; a transfer reaches the queue named; the fallback path.
 - The transcript is what the caller heard. Compare Norwegian calls with Norwegian calls. Speech recognition treats the language as a bias, not a lock, so one wrong-language answer is not a setting fault.
 - A call writes no verification event. Report a call as not proved by event; read the event feed for the call as the record instead.

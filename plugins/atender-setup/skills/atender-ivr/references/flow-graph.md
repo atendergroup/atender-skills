@@ -3,6 +3,13 @@
 `update_ivr_flows_definition` takes the whole graph in one write. Write it before
 you bind the flow to a number, because a write is live on a bound number.
 
+The queues come first. `create_voice_call_queues` before `create_ivr_flows`:
+without a queue the flow write answers 201 and the number never syncs.
+
+After every `update_ivr_flows_definition`, call `publish_ivr_flows` and check
+`provisioningError` is null. An unpublished definition changes nothing a caller
+hears.
+
 ## Node types
 
 | Node | Required data | Edges it must have |
@@ -22,8 +29,8 @@ listed here. The schema wins.
 ## Rules for the graph
 
 - Exactly one `incoming-call`.
-- An `is-open` node comes before **every** `send-to-queue`. A queue with nobody online holds the caller with no limit.
-- Every key you offer in a prompt has a matching `digit-N` edge. A key with no edge is a dead press.
+- An `is-open` node comes before **every** `send-to-queue`. A queue holds a caller with no ceiling, and there is no maximum hold time to set — pair the `is-open` with `callbackEnabled` and a low trigger position on the queue itself (IV-01).
+- Every key you name in a prompt has a matching `digit-N` edge. A key with no edge is a dead press. This one you read, you do not compute: a `gather-input` declares no list of keys, so there is no list to check the edges against.
 - Every keyed `gather-input` has a `timeout` edge, for the caller who presses nothing.
 - No self edges. A wrong key already counts against `maxRetries`; a self edge loops the caller with no way out.
 - Never add a `language-selection` node only to change the voice. `say-message` and `gather-input` each carry their own `language` and `voice`.
@@ -55,11 +62,15 @@ Stack's `voiceLanguageVoices` takes ElevenLabs ids. They are not interchangeable
 The validator does not check any of this. Before you publish, walk the graph and
 confirm:
 
-1. Every key named in a prompt has a `digit-N` edge.
-2. Every keyed `gather-input` has a `timeout` edge.
-3. No edge points at its own source node.
-4. Every `send-to-queue` is preceded by an `is-open`.
-5. The node and edge counts in `get_ivr_flows` match what you sent.
+1. Every keyed `gather-input` has a `timeout` edge.
+2. No edge points at its own source node.
+3. Every `send-to-queue` is preceded by an `is-open`.
+4. The node and edge counts in `get_ivr_flows` match what you sent.
+5. Every queue the flow sends to has `callbackEnabled` with a low trigger position.
+
+There is no "one edge per offered key" check to run mechanically: a
+`gather-input` declares no list of keys. Read each prompt and confirm by eye that
+every key it names has a `digit-N` edge.
 
 ## The test script
 
@@ -72,6 +83,7 @@ One call per branch, and read each one back:
 - One call outside opening hours. The `false` branch of `is-open` runs.
 - One call that reaches `send-to-ai-agent`, to check the handover from the menu into the assistant.
 
-Then `get_ivr_flows` and `list_voice_phone_numbers` for the counts,
-`publishedRevision`, `configured`, `syncedAt` and `provisioningError`. Wait more
+Then `publish_ivr_flows`, and `get_ivr_flows` and `list_voice_phone_numbers` for
+the counts, `publishedRevision`, `configured`, `syncedAt` and
+`provisioningError` (which must be null). Wait more
 than 30 seconds after a change before the first call that should read it.

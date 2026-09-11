@@ -8,10 +8,14 @@ a verification round; the provisioned one costs nothing.
 
 ## The MX warning
 
-Publishing MX records for a domain moves **all** inbound mail of that domain to
-Atender. If the domain already receives mail — the company's own mailboxes, a
-help desk, anything — do not put MX records on it. Use a subdomain, for example
-`help.example.com`, and leave the parent domain untouched.
+`create_email_domains` returns a record set that **includes MX**, and MX records
+move **all** inbound mail for the name they are published on to Atender.
+
+So: if the apex domain already receives mail — the company's own mailboxes, a
+help desk, anything — do not register the apex. Register a subdomain instead,
+such as `mail.example.com` or `help.example.com`, publish the returned records
+on that name, and leave the apex untouched. The assistant then answers at
+`support@mail.example.com`.
 
 Say this to the customer in plain words before they publish anything. It is the
 one change in this area that can take a company's mail down.

@@ -32,7 +32,7 @@ Reading email domains needs `email:read`; the rest of this area needs
 
 ## Needs from the customer
 
-- The address the assistant should answer, and whether that domain already receives or sends mail somewhere else.
+- The address the assistant should answer, and whether that domain already receives or sends mail somewhere else. If it receives mail, the sending domain is a subdomain such as `mail.example.com`.
 - Who publishes their DNS.
 - Which team and which Agent Stack the inbox belongs to.
 - For SMS: a sender name, 3 to 11 letters and digits.
@@ -40,7 +40,7 @@ Reading email domains needs `email:read`; the rest of this area needs
 ## Checklist
 
 - **CH-01** For each channel, report its Agent Stack (`mainAgentId`), team and status. A channel with no stack gets no AI answer.
-- **CH-02** Use the provisioned email domain unless the customer wants their own. For their own: `create_email_domains` {`domainName`, `fromEmail`, `fromName`}. **If that domain already has MX records, use a subdomain.**
+- **CH-02** Use the provisioned email domain unless the customer wants their own. For their own: `create_email_domains` {`domainName`, `fromEmail`, `fromName`}. **If the apex domain already receives mail, register a subdomain instead — `mail.example.com`, `help.example.com` — and leave the apex alone.** The records the call returns include MX, and MX records move all inbound mail for whatever name they are published on.
 - **CH-03** Give the customer `dnsRecords` as a table. After they publish them, call `create_email_domains_verify` once: status `active`, every record `valid`.
 - **CH-04** `create_email_channels` with `mainAgentId`, `teamId` and `status: "disabled"`. After the email test passes: `update_email_channels` `status: "active"`.
 - **CH-08** `update_sms_settings` {`senderName`}. `update_sms_number_routing` takes `teamId` or `mainAgentId`, never both.
@@ -51,7 +51,7 @@ in `references/domains-and-deliverability.md`.
 
 ## Rules
 
-- **Publishing MX records moves all inbound mail of that domain.** If the domain already receives mail anywhere, use a subdomain instead. Say this to the customer before they touch DNS.
+- **The returned records include MX, and MX records move all inbound mail for the name they are published on.** If the apex already receives mail — company mailboxes, a help desk, anything — do not put them there: use a subdomain such as `mail.example.com`. Say this to the customer in plain words before they touch DNS.
 - Merge the SPF value into the existing SPF record. A domain may have only one. Do not touch DMARC.
 - An inbox on a domain that is not `active` is refused with 400 `DOMAIN_INACTIVE`. Verify the domain first.
 - Never set SMS `enabled` to false as a pause. It stops one-time codes too.

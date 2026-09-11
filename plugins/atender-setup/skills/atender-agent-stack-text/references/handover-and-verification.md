@@ -12,11 +12,11 @@ These items are for text stacks. On a voice stack only HO-02 applies; the
 `atender-agent-stack-voice` skill owns the rest.
 
 - **HO-01** `handoverMode` = `explicit_team` (one team) or `by_description` (the AI picks among teams that have a description). Set `never` only if the customer says so in writing.
-- **HO-02** `handoverTeamId` = an existing team id. Required with `explicit_team`; the API does not refuse it when missing. With `by_description`, every candidate team has a description.
+- **HO-02** `handoverTeamId` = an existing team id. Required with `explicit_team`; the API does not refuse it when missing. With `explicit_team` and no team the handover fails at run time — the error is logged and shown in the message debug panel in the app, so check the message debug panel for a conversation that should have handed over and did not. With `by_description`, every candidate team has a description.
 - **HO-03** `handoverInstructions` (written per stack, never copied): first a paragraph that says handing over is the last step (identify the customer, read the record, do everything inside your limits first); then one criterion per line; then the ruled-out cases in words, for example "frustration is not a handover; the first two replies after a complaint begins are answered in full" and "working out which item the customer means is never a handover". Show the customer the full text before you save it.
 - **HO-04** `handoverWhenUnsure` = false, unless the customer wants every message outside the specialists' topics sent to a person with no clarifying question. Same value on every text stack.
 - **HO-05** `handoverAskConfirmation` = true. The customer then chooses "Yes, transfer me" or "Not yet" before the handover commits.
-- **HO-06** Opening hours, in this order: `create_opening_hours_rule` with `timezone` set explicitly (the default is UTC) and `holidayCountry`, then `set_opening_hours_assignment` per team and channel. A pair with no assignment takes the default rule. No rule at all reads as always open.
+- **HO-06** Opening hours, in this order: `create_opening_hours_rule` with `timezone` as an IANA name such as `Europe/Oslo` (the default is UTC) and `holidayCountry`, then `set_opening_hours_assignment` per team and channel. A pair with no assignment takes the default rule. No rule at all reads as always open.
 - **HO-07** `handoverOfferEmailFollowup` and `handoverOfferCloseAndReturn` = the customer's answer. `handoverCheckOpeningHours` = true only after HO-06 and only with at least one offer true. With both offers false a closed team still gets the handover.
 - **HO-08** One required-information row per fact the team needs: `fieldScope` and `fieldKey` that exist (conversation: `subject` or a conversation custom field; contact: `email`, `phone` or a CRM field); `fieldLabel` = a noun phrase under 60 characters that completes "Before I connect you with a teammate, I need one more thing, {label}."; `askPrompt` = an instruction to the AI; `conditionMode` `always`, or `when` with `conditionText` written against what the customer said, never against a subject. Match existing rows on `fieldScope` and `fieldKey`, never on an id.
 
@@ -24,7 +24,7 @@ Rules:
 
 - Every sentence in `handoverInstructions` is appended to the handover tool description, and every sentence is an instruction to escalate. Write criteria, never subjects.
 - The reply text does not prove a handover happened or did not. Read the conversation record.
-- Create a custom field for a requirement with `fieldScope` conversation. A contact-scope custom field cannot back a requirement, and `create_custom_field` defaults to contact.
+- **Always send `fieldScope: "conversation"` on `create_custom_field` when a prerequisite will name the field.** `create_custom_field` defaults to contact, a contact-scope field cannot back a requirement, and the scope cannot be changed afterwards — a field created with the wrong scope is wasted and has to be replaced.
 - Do not delete a custom field that a requirement names. The requirement can then never be met.
 - An email or phone requirement is met only by an address already trusted on the contact. A typed address makes the customer prove it with a code where a code can be sent.
 - Send a switch only in a write meant to change it.
@@ -35,7 +35,7 @@ Verify:
 - Read every stack and its requirements back, and show one table, one row per stack, before and after.
 - Per text stack: one conversation that must not hand over and one that must. Read the handover state, reason, team and each required field from the conversation record.
 - If HO-07 is on: one handover outside hours shows the offers; one inside hours commits.
-- The reply "I'm not able to connect you with a teammate right now" means no team was reachable. Fix HO-01 and HO-02.
+- The reply "I'm not able to connect you with a teammate right now" means no team was reachable. Read the message debug panel in the app for the logged error, then fix HO-01 and HO-02.
 
 ## Customer verification (CV)
 

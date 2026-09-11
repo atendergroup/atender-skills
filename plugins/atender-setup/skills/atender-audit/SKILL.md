@@ -46,13 +46,13 @@ and whether a gap you found is on purpose.
 ## The ten faults to look for
 
 1. Knowledge Base articles that sit at `draft`. Only `published` reaches the AI.
-2. A specialist that must follow policy with `handbookEnabled` false.
+2. A specialist that must follow policy with `handbookEnabled` false. The default is false on purpose, so judge it against the job the specialist does, never report the default itself as a fault. On a text channel this switch and `kbEnabled` are what gate retrieval; the stack's `knowledgeBaseEnabled` is a voice switch and gates nothing on text.
 3. An Agent Stack that is `enabled` with no enabled member. It answers nothing.
-4. A stack with `handoverMode: "explicit_team"` and no `handoverTeamId`.
+4. A stack with `handoverMode: "explicit_team"` and no `handoverTeamId`. The handover then fails at run time; the error is logged and visible in the message debug panel in the app, so say where to look rather than that nobody sees an error.
 5. An email channel or custom channel with no `mainAgentId`, or a widget with no `aliMainAgentId`. It gets no AI answer, and nothing says so.
-6. A voice stack with no `voiceLanguageVoices` for a language it is meant to answer in.
-7. No call queue, while a phone number or IVR flow exists. The number never syncs.
-8. An IVR flow with a node that has no timeout edge. A caller who says nothing falls off the flow.
+6. A voice stack with no `voiceLanguageVoices` entry for a language it is meant to answer in. An empty map makes every call hear that the number is unavailable.
+7. No call queue, while a phone number or IVR flow exists — the number never syncs. Also a queue the flow sends to with `callbackEnabled` off: the hold has no ceiling.
+8. A keyed `gather-input` with no `timeout` edge, a self edge, or a `send-to-queue` with no `is-open` before it. A caller who presses nothing falls off the flow, and a queue holds with no ceiling. There is no per-key check: a `gather-input` declares no list of keys.
 9. Tags created and never used, and tags the areas apply that do not exist. An unknown tag name is dropped with a 200.
 10. A widget, channel, number or queue that names a stack that is disabled or gone, and a stack that nothing names at all.
 

@@ -41,21 +41,21 @@ caller hears today.
 
 ## Checklist
 
-- **IV-01** Queues: one per team, each with a `description` (the assistant routes only to described queues). Set `callbackEnabled`, `holdAudioType` and `reservationTimeout` as agreed. `create_voice_call_queues`.
+- **IV-01** Queues first, always: `create_voice_call_queues` **before** `create_ivr_flows`. One queue per team, each with a `description` (the assistant routes only to described queues). Set `holdAudioType` and `reservationTimeout` as agreed, and set **`callbackEnabled` with a low trigger position** — a queue holds a caller with no ceiling and there is no maximum hold time to set, so the call back is the only way out of a long wait.
 - **IV-02** Number: `phoneNumber` starts with `+`, `capabilities.voice` is true, and there is one row per number in `list_voice_phone_numbers`. If not, stop.
 - **IV-03** `create_ivr_flows`: `ttsLanguage` (BCP-47) and `ttsVoice` (a Polly name). No `welcomeMessage`.
 - **IV-04** Definition: `update_ivr_flows_definition` with the whole graph, written before the bind. The node types, their required data and the edge handles are in `references/flow-graph.md`.
-- **IV-05** Check the graph yourself. The validator does not check it: every offered key has an edge, every keyed menu has a `timeout` edge, there are no self edges, and the node and edge counts match what you sent.
+- **IV-05** Check the graph yourself. The validator does not check it: every keyed menu has a `timeout` edge, there are no self edges, every `send-to-queue` has an `is-open` node before it, and the node and edge counts match what you sent. There is no per-key check to run — a `gather-input` declares no list of keys, so there is nothing to compare the `digit-N` edges against. Read the prompt text instead and make sure each key it names has an edge.
 - **IV-06** Bind: `update_voice_phone_numbers` with `ivrFlowId`, `mainAgentId` and `defaultAgentLanguage` in one call. If `provider.configured` is false, call `create_voice_phone_numbers_provision` once. On a 409, stop and tell the customer.
-- **IV-07** Publish: `publish_ivr_flows` with a comment. `provisioningError` must be null.
+- **IV-07** Publish: after **every** `update_ivr_flows_definition`, call `publish_ivr_flows` with a comment and then check `provisioningError` is null. An unpublished definition changes nothing a caller hears, and a publish that left `provisioningError` set has not reached the carrier.
 
 ## Rules
 
 - Never draw a self edge. A wrong key already counts as a miss, and a self edge makes a caller loop with no way out.
 - Never add a `language-selection` node only to change the voice. Set `language` and `voice` on the node instead.
-- A queue with nobody online holds the caller with no limit. Use an `is-open` node and a call back.
+- A queue holds a caller with no ceiling; there is no maximum hold time. Both guards are needed: `callbackEnabled` with a low trigger position on the queue, and an `is-open` node before every `send-to-queue`.
 - Check what a number is before you diagnose anything after it. One row, `+` prefix, `capabilities.voice` true.
-- A write is live on a bound number. Write the definition before the bind, and publish deliberately.
+- A write is live on a bound number. Write the definition before the bind. Every definition write is followed by a `publish_ivr_flows` and a `provisioningError` check — otherwise the change is stored and never heard.
 - After a change to a number, a stack or a flow, the first call more than 30 seconds later reads the change.
 - The greeting is at most two sentences: who we are, what the line is for, then the first choice.
 - A test call is a real call that costs money. Get a yes before each one, and do not score the first call.

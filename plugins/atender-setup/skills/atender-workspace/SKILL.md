@@ -31,7 +31,7 @@ questions the other skills would otherwise ask.
 - Whatever they already have written down: a brand guide, a zip of files, a folder, a website address, or answers in chat.
 - The groups of people who answer customers, and who is in each.
 - The subjects they want to filter conversations by.
-- Opening hours per team and channel, with timezone and holiday country.
+- Opening hours per team and channel, with the timezone as an IANA name (`Europe/Oslo`) and the holiday country.
 - Whether they want a satisfaction survey, and a name to send SMS from.
 
 ## Checklist: the company profile
@@ -63,7 +63,7 @@ what no route accepts are in `references/brand-surfaces.md`.
 - **WS-16** `create_teams` {`name`, `description`, `memberIds`}, only for names not in `list_teams`. A `memberId` who is not a member of the workspace gets a 400 that names the id.
 - **WS-17** Change members only by the full-list merge in the basics file: `update_teams` replaces the list.
 - **WS-18** `create_tags` {`name` (max 100, exact case), `description`}, only for names not in `list_tags`. The auto-tag model reads the description, and there is no update route, so the description is final.
-- **WS-19** `create_opening_hours_rule` per schedule the customer keeps: `name`, `schedules`, `timezone` set explicitly, `holidayCountry`, `dateOverrides`. The first rule of a workspace becomes the default.
+- **WS-19** `create_opening_hours_rule` per schedule the customer keeps: `name`, `schedules`, `timezone`, `holidayCountry`, `dateOverrides`. **Always send `timezone` as an IANA name — `Europe/Oslo`, `Europe/Stockholm`, `America/New_York` — on `create_opening_hours_rule` and on `set_opening_hours`. The default is UTC, so a rule with no timezone opens and closes at the wrong hour and nothing reports it.** The first rule of a workspace becomes the default.
 - **WS-20** `set_opening_hours_assignment` {`teamId`, `channel`, `ruleId`, `mode`} for each team and channel pair. A pair with no assignment takes the default rule, which is not the same as closed.
 - **WS-21** Survey on or off: `update_csat_settings` {`enabled`, `sendSurveyEnabled`}. `enabled` cannot become true until `mailgunDomainId` names an active sending domain.
 - **WS-22** SMS sender name: `update_sms_settings` {`senderName`}, 3 to 11 letters and digits with at least one letter. `null` puts every message back on the workspace number.
@@ -72,6 +72,7 @@ what no route accepts are in `references/brand-surfaces.md`.
 
 ## Rules
 
+- An opening-hours write with no `timezone` is UTC, not the customer's local time. Send it on every `create_opening_hours_rule` and `set_opening_hours`.
 - A colour is a hex string. A colour name or `rgb()` is a 400 on `update_branding`, `update_email_brand_settings` and `update_incidents_settings`.
 - `null` clears a colour or a logo. Send it only when the customer asked for the value to go.
 - Send only the fields you change. Never build a brand write body from a read.
