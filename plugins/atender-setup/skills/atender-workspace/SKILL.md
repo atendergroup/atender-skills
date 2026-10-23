@@ -44,7 +44,7 @@ questions the other skills would otherwise ask.
 
 ## Checklist: brand
 
-- **WS-06** Pull the logo and the colours as hex out of the material. No font setting exists, so do not ask for fonts. Show what was found, each value with where it came from, and get a yes before the first write.
+- **WS-06** Pull the logo and the colours as hex out of the material. The only font setting is the Knowledge Base portal's, in its layout in the app; no other surface and no API route takes a font. Show what was found, each value with where it came from, and get a yes before the first write.
 - **WS-07** Look and feel: `update_branding`.
 - **WS-08** Email: `update_email_brand_settings`. It merges, and it makes the row when there is none.
 - **WS-09** Chat widget: `update_chat_widget`, light set and dark set.
@@ -99,7 +99,7 @@ reports what a handset shows.
 
 ## What must be done in the app
 
-Inviting a user. Deleting a team. Uploading an
+The Knowledge Base portal font. Inviting a user. Deleting a team. Uploading an
 image file — those routes are multipart and are not MCP tools, so host the logo
 yourself and pass the URL. The Knowledge Base portal layout, which
 `layoutConfigV3` and `templateConfig` refuse here. Removing a custom domain,

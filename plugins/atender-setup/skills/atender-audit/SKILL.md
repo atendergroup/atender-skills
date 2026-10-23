@@ -75,5 +75,5 @@ whether a gap is on purpose.
 Nothing here — this skill changes nothing. Say in the report which gaps can only
 be closed in the app rather than over the API: inviting a user, deleting a team,
 uploading an image file, the Knowledge Base portal layout, removing a custom
-domain, publishing DNS records, and entering any real credential. Fonts have no
-setting anywhere.
+domain, publishing DNS records, and entering any real credential. The only font
+setting is in the Knowledge Base portal layout.

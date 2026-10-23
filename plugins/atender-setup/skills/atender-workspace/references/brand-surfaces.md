@@ -110,7 +110,7 @@ domain is an app job.
 
 | What | Where it happens |
 | --- | --- |
-| Fonts and typefaces | Nowhere. No font setting exists, in the app or on the API |
+| Fonts and typefaces | The Knowledge Base portal layout in the app is the only font setting. No API route carries a font field |
 | Uploading an image file | Multipart routes exist on the REST API but are not MCP tools. Host the file and pass the URL |
 | The Knowledge Base portal layout | The app; `layoutConfigV3` and `templateConfig` are refused |
 | Removing a custom domain | The app |

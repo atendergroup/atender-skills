@@ -30,7 +30,7 @@ you rely on it.
 
 ## `resourceOwnership`
 
-- `resourceKeys` — the names of the **arguments** the model fills that name a resource. Not fields in the response. One rule can list several, for example `bookingRef`, `pir` and `voucherCode`.
+- `resourceKeys` — the names of the **arguments** the model fills that name a resource. Not fields in the response. One rule can list several, for example `bookingRef`, `orderId` and `voucherCode`.
 - `lookup.path` — the endpoint that answers "does this person own this resource", with a `{{variable}}` for the identity.
 - `lookup.identifierPaths` — where in that answer the owning identifier sits.
 
