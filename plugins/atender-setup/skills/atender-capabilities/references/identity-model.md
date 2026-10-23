@@ -23,18 +23,23 @@ API uses to identify a person.
 
 If the API cannot take an email or a phone number as the handle, the customer has
 to give you an identifier the customer themselves holds, plus the endpoint that
-lists the people on that account. Then check the live schema for
-`accountVerification`; if it is present, set it. That field is unconfirmed as of
-2026-09-10 — prove one bound call before you rely on it.
+lists the people on that account. Then set `accountVerification` in
+`authModeConfig` and try the lookup with `test_api_definitions_account_lookup`,
+which answers the shape of the reply, never a value. Prove one bound call before
+you rely on it.
 
 ## `resourceOwnership`
 
-- `resourceKeys` — the names of the **arguments** the model fills that name a resource. Not fields in the response.
+- `resourceKeys` — the names of the **arguments** the model fills that name a resource. Not fields in the response. One rule can list several, for example `bookingRef`, `pir` and `voucherCode`.
 - `lookup.path` — the endpoint that answers "does this person own this resource", with a `{{variable}}` for the identity.
 - `lookup.identifierPaths` — where in that answer the owning identifier sits.
 
+A key matches an argument of that name at any depth of the input, also inside a
+list. So a generic name collides: `code` in `resourceKeys` also guards
+`items[].code`. Use the exact, specific argument names.
+
 One connection holds one ownership rule. If two operations need different
-ownership rules, they need two connections.
+ownership lookups, they need two connections.
 
 <!-- site:skip -->
 ## Redaction

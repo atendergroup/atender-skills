@@ -23,9 +23,7 @@ Read `../_shared/atender-setup-basics.md` first — connection, precedence, the
 order of areas, the preflight, pacing, the report format and the groundwork
 areas. Then call `describe_configuration_model`. The live tool schemas win for
 field names and shapes; this skill wins over `describe_configuration_model` for
-the order of work and for how to test. `describe_configuration_model` is wrong
-for Capabilities today: it points at `create_agent_tools`, which is only for raw
-tools. The order below is the right one.
+the order of work and for how to test. Read its `capabilities` area too.
 
 Verification settings come before any Capability above the `read` tier. The
 specialists that will hold the tools come before the attach.
@@ -39,15 +37,15 @@ specialists that will hold the tools come before the attach.
 
 ## Checklist
 
-- **CA-01** `create_api_definitions_parse`, then `create_api_definitions` {`name`, `baseUrl`, `authMode`, `authType`, `endpoints`}. Spec limit 1 MB; if it is too large, trim response schemas only.
+- **CA-01** `create_api_definitions` {`name` (unique), `baseUrl`, `authMode`, `authType`, and `documentationUrl` or `rawDocumentation`}. The create stores the documentation and parses nothing. Then `create_api_definitions_refresh_documentation` to parse it into the endpoint list (`readOnly`, `tags`, `pathPrefix` and `methods` narrow it), and `list_api_definitions_endpoints` to read the result. Or seed the create with an `endpoints` array from `create_api_definitions_parse`. Spec limit 1 MB; if it is too large, trim response schemas only.
 - **CA-02** Each request body is `{contentType, schema}`, an OpenAPI `requestBody`, or a JSON Schema. Any other shape gives the model no `body` argument.
 - **CA-03** Add missing operations with `create_api_definitions_endpoints`.
-- **CA-04** Before any tier above `read`, set `authModeConfig` with `update_api_definitions`: `sessionVariableMapping`, `claimVariableMapping` (after a code the claim is the verified email or E.164 phone) and `resourceOwnership` (`references/identity-model.md`). If the API cannot take that handle, check the live schema for `accountVerification`; if present, set it (unconfirmed on 2026-09-10; prove one bound call before you rely on it).
+- **CA-04** Before any tier above `read`, set `authModeConfig` with `update_api_definitions`: `sessionVariableMapping`, `claimVariableMapping` (after a code the claim is the verified email or E.164 phone) and `resourceOwnership` (`references/identity-model.md`). If the API cannot take that handle, set `accountVerification` (the account lookup) and try it with `test_api_definitions_account_lookup`; prove one bound call before you rely on it.
 - **CA-05** `test_api_definitions_redaction` on a real sample response, then write `redactionRules`, `redactionApplyDefaults`, `redactionCustomFields`.
 - **CA-06** `create_capabilities` for each operation: `name`, `displayName`, `description`, `usageGuidance` (when to call it, which inputs, what the answer means), `isSimpleTool: true`, `simpleToolConfig` {`actionType: "api_call"`, `apiDefinitionId`, `endpointId`}, `actionTier`.
 - **CA-07** `actionTier`: the tier table in `references/tiers-and-changes.md`. Do not send `securityLevel`. `ownershipExempt: true` only when the operation names nothing a customer owns.
 - **CA-08** Show the customer a table: operation, tier, consequence, specialists.
-- **CA-09** `publish_capabilities`. Fix each failed item, then publish again.
+- **CA-09** `publish_capabilities`. The publish builds the tool the specialists hold; never make that tool with `create_agent_tools`. A refusal is 422 `PUBLISH_BLOCKED` with `details` that name each failed item: fix each one, then publish again.
 - **CA-10** `create_specialists_tools` with `toolId` = the Capability id, only where it is needed.
 - **CA-11** Changing a live Capability: the change matrix in `references/tiers-and-changes.md`.
 - **CA-12** Every "do X" rule has a specialist that holds the tool for X. A specialist that must choose one of several items holds the tool that lists them.
@@ -58,10 +56,11 @@ The identity model — session mapping, claim mapping, resource ownership — is
 ## Rules
 
 - A mapped argument is filled only after verification, so the Brief says: verify first.
-- A refresh of the documentation deletes the non-manual endpoints that left the spec.
+- A documentation refresh removes an endpoint that left the spec, unless it was added by hand. Endpoints added with `create_api_definitions_endpoints` or seeded on the create, and their commands, survive it.
 - The publish checklist runs only on the transition to `published`. After a connection change, unpublish and publish one Capability to run it again.
 - Unpublish removes the tool from every specialist and keeps the assignments.
 - A create with status `published` is refused. Create, then publish.
+- `create_specialists_tools` with an unpublished Capability id answers 404 `CAPABILITY_NOT_PUBLISHED`.
 - A refusal that names an attached, published Capability is a platform fault, not wording: check the assignment once, then report it. The code and `details` name the failing item.
 
 ## Verify

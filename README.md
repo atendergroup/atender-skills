@@ -44,7 +44,7 @@ full picture.
 
 The skills mirror the setup guide at
 <https://www.atender.com/docs/mcp-setup>. The field names, tool names and
-behaviour in them were checked against the Atender API on 10 September 2026.
+behaviour in them were checked against the Atender API on 23 October 2026.
 
 ## Contributing
 

@@ -4,13 +4,23 @@
 
 | Field | What it does |
 | --- | --- |
-| `aliMainAgentId` | The Agent Stack that answers. Without it the widget gets no AI answer |
+| `aliMainAgentId` | The Agent Stack that answers at all times |
 | `defaultTeamId` | The team a conversation lands in, and the team whose opening hours the widget reads |
-| languages | The languages the widget offers a visitor |
-| `welcomeMessage` | The first thing a visitor reads, per language |
+| `primaryLanguage`, `secondaryLanguages` | The languages the widget offers a visitor |
+| `welcomeMessage` | The first thing a visitor reads, in the primary language. Other languages: the translation tools below |
 | `outsideHoursMessage` | What a visitor reads when the primary team is closed |
-| `afterHoursMainAgentId` | The Agent Stack that answers outside the primary team's hours |
+| `afterHoursMainAgentId` | The Agent Stack that answers only while the `defaultTeamId` team is closed. With neither stack field the widget gets no AI answer |
 | colours | Widget branding. The rest of the brand is `update_branding` |
+
+## Texts in more than one language
+
+The widget fields hold the primary language. The texts of each secondary language
+are stored apart:
+
+- `generate_chat_widget_translations` {`languages`, `force`} starts an AI translation of the stale languages; `force` redoes all of them and replaces hand edits.
+- `list_chat_widget_translations` reads the texts per secondary language.
+- `update_chat_widget_translation` changes some texts of one secondary language; `null` removes one text. The primary language is refused here.
+- `delete_chat_widget_translation` removes the stored texts of one language. The widget still offers that language.
 
 <!-- site:skip -->
 ## Taking the AI off a widget
@@ -28,9 +38,9 @@ the app, not from here.
 ## Routing
 
 A widget conversation goes to `defaultTeamId` and is answered by
-`aliMainAgentId`. There is no per-language or per-page routing on the widget: to
-send different pages to different teams, use more than one widget, or route
-inside the Agent Stack with specialist routing rules.
+`aliMainAgentId`. `marketRouting` sends a market to a team. There is no per-page
+routing on the widget: to send different pages to different teams, use more than
+one widget, or route inside the Agent Stack with specialist routing rules.
 
 <!-- site:skip -->
 ## After hours
@@ -71,13 +81,15 @@ A custom channel carries a conversation inside the customer's own application.
 
 1. `create_channels` {`type: "custom"`, `mainAgentId`, `defaultTeamId`}. Add a `webhookUrl` only if replies must be pushed somewhere.
 2. Give the customer the `secret` once — it is shown once. Never ask them to paste it back into the chat.
-3. `test_channels` to prove the receiver before any message.
+3. `test_channels` to prove the receiver before any message. A channel with no `webhookUrl` answers `ok: false` by design.
 4. `create_channels_messages` to send an inbound message. The reply goes to the channel's `webhookUrl` only, so it reaches no customer.
 5. `list_channel_deliveries` to read the result; `resend_channel_delivery` for a failed one.
 
 ### A pull channel, for testing
 
 Create it with **no `webhookUrl`**: there is then nowhere a reply can be pushed.
+The stack must be enabled first: a message on a channel runs a turn only on an
+enabled stack. Prove the wording before the enable with `test_agent_stacks`.
 Send with `create_channels_messages` and read the trace back with
 `list_conversations_messages`, `list_conversation_events`,
 `list_routing_decisions` and `list_tool_execution_logs`. This is the safe test

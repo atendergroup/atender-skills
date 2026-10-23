@@ -5,7 +5,7 @@ to connect, who wins when sources disagree, the order of work, the preflight,
 pacing, the report format, and the two groundwork areas (Knowledge Base,
 Handbook) that no single skill owns.
 
-Evidence date of the content in these skills: 2026-09-11. Anything marked
+Evidence date of the content in these skills: 2026-10-23. Anything marked
 unconfirmed below is not a fact — check the live schema before you rely on it.
 
 ## What the Atender MCP is
@@ -32,14 +32,14 @@ Scope map. Scope names do not follow one pattern.
 | Work | Scope |
 | --- | --- |
 | Create a team | `teams:manage` (`teams:write` only edits) |
-| Tags | `tags:*` |
+| Create, rename, move or delete a tag, and its AI auto-tag settings | `tags:manage` (`tags:write` only puts tags on conversations) |
 | Knowledge Base and Handbook | `knowledge:*` |
 | Agent Stacks, specialists, Capabilities, API connections, handover and verification settings | `agents:*` |
 | Opening hours | `opening-hours:*` |
 | Email channels, custom channels, phone numbers | `channels:*` (reading email domains needs `email:read`) |
 | Chat widget | `widgets:*` |
 | Call queues, IVR flows, voice settings | `voice:*` |
-| SMS | `sms:*` |
+| SMS settings, SMS numbers and number requests | `sms:*` |
 | Reading test results back | `conversations:read` and `agents:read` |
 
 There is no route that reads a connection's own scopes. Probe one read per area
@@ -49,7 +49,7 @@ and read the 403 text. Do not say a scope is missing until a call returns 403.
 
 1. The live tool input schemas win for field names, shapes and values. Always.
 2. These skills win over `describe_configuration_model` for the order of areas and for how to test.
-3. Call `describe_configuration_model` first anyway, and tell the user where it disagrees with a skill.
+3. Call `describe_configuration_model` first anyway, and tell the user where it disagrees with a skill. Pass `area` (for example `agent-stack`, `capabilities`, `web-chat-email`, `voice`, `ivr`) to read the rules of one area.
 4. Put today's date on every "this does not exist" finding. Probe again before you act on one more than a day old.
 
 ## Order of operations
@@ -64,7 +64,7 @@ This order wins over any other order you read. Why each step is where it is:
 - Teams first: a channel, a stack handover, a call queue and a phone number all take a team id.
 - Tags before anything applies one: an unknown tag name is dropped with a 200.
 - Knowledge Base and Handbook before the stack answers anybody.
-- Capability: endpoint, then capability, then publish, then attach. A create with status published is refused.
+- Capability: connection, then a documentation refresh (or seeded endpoints), then capability, then publish, then attach. A create with status published is refused.
 - Verification settings before any Capability above the read tier.
 - Opening hours before the opening-hours handover switch. Ask the customer which timezone the hours are in, as an IANA name such as `Europe/Oslo`, and send that answer in `timezone` on every rule. Leave it out and the API stores `UTC` without saying so.
 - Call queues before an IVR flow; the number after both. Without a queue the write answers 201 and the number never syncs.
@@ -76,7 +76,7 @@ report the item as blocked.
 
 One read call per area, before the first write, in every area you are about to
 touch: `list_teams`, `list_users`, `list_tags`, `list_kb_articles` (no status
-filter, `includeArchived=true`, every page), `list_handbook`, `list_agent_stacks`,
+filter, `includeArchived: true`, every page), `list_handbook`, `list_agent_stacks`,
 `list_specialists`, `list_capabilities`, `list_api_definitions`, `list_channels`,
 `list_email_channels`, `list_email_domains`, `list_chat_widgets`,
 `list_voice_phone_numbers`, `list_voice_call_queues`, `list_ivr_flows`,
@@ -84,6 +84,8 @@ filter, `includeArchived=true`, every page), `list_handbook`, `list_agent_stacks
 
 If `atender-profile.md` exists in the working folder, read it and do not ask the
 customer the questions it already answers.
+
+List tools take a number for `limit` and a boolean for `includeArchived`.
 
 Then report three lists: reads that worked, write scopes the plan needs, and what
 you could not check. A read does not prove write access. Do not filter a list you
@@ -138,7 +140,7 @@ on a new workspace; everything below assumes its teams and tags already exist.
 Goal: the articles customers read exist, published, in the knowledge base the
 stack reads, taken from the customer's own sources, with the gaps listed.
 
-Read first: `list_kb_articles` with no `status` filter, `includeArchived=true`,
+Read first: `list_kb_articles` with no `status` filter, `includeArchived: true`,
 every page.
 
 Needs from the customer: where their customer-facing content lives today; the
@@ -148,9 +150,9 @@ help page.
 - **KB-01** Partition: say which knowledge base each stack reads (`kbPartitionId`; null means the one with `isDefault: true`). Writes from here land only in the default one.
 - **KB-02** Categories named after what a customer looks for. `import_kb_categories` (skips an existing slug); subcategories with `create_kb_subcategories`.
 - **KB-03** One article per real question, whole, from the customer's source. Headings, paragraphs, lists, bold only. Subject in the heading; no "as described above"; site-only links as plain text.
-- **KB-04** Key = `slug`. `import_kb_articles` with an explicit `slug`. A rerun skips it; without a slug it duplicates. Change content with `update_kb_articles` by id, and never change the title (it regenerates the slug).
+- **KB-04** Pick one key and keep it. By id: `create_kb_articles`, record the id, then publish it. By `slug`: `import_kb_articles` with an explicit `slug`; a rerun skips it, and without a slug it duplicates. Change content with `update_kb_articles` by id, and never change the title (it regenerates the slug).
 - **KB-05** Only `published` articles reach the AI. Default is `draft`. Publish each approved article (`status: "published"` or `publish_kb_articles`).
-- **KB-06** One article per question, in the primary language. Published articles are translated into each language active in the app (unconfirmed on 2026-09-10; check the live schema and one article before you rely on it). Never create one article per language.
+- **KB-06** One article per question, in the primary language. Never create one article per language. Publishing translates nothing. A knowledge base language is added with `add_kb_language` (codes from `list_available_kb_languages`) and starts as `disabled`; `update_kb_language` with `status: "active"` starts AI translation of the whole knowledge base into it, which uses AI credits. Get a yes before you activate a language.
 - **KB-07** Hosted page: `update_kb_portal_settings` `kbTemplate` = `spotlight` or `sidebar`. Classic renders blank from here.
 - **KB-08** List each topic with no source as a gap for the customer. Never write it yourself.
 
@@ -162,7 +164,7 @@ Verify:
 - Put each public article next to the Handbook rule on the same subject. Bring every conflict to the customer to rule on.
 - Hosted page: open it. Blank with every call answering 200 means the template, not the content.
 
-In the app: enable languages; restrict a specialist to some categories; fill a
+In the app: restrict a specialist to some categories; fill a
 second brand's knowledge base; edit the portal layout.
 
 ## Groundwork: Handbook

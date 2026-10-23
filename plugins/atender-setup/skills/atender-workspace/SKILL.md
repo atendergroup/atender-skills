@@ -30,7 +30,7 @@ questions the other skills would otherwise ask.
 
 - Whatever is already written down: a brand guide, a zip, a folder, a website address, or answers in chat.
 - The groups of people who answer customers, and who is in each.
-- The subjects they want to filter conversations by.
+- The subjects they want to filter conversations by, and which of them sit under another.
 - Opening hours per team and channel, the holiday country, and the `timezone` those hours are in as an IANA name (`Europe/Oslo`). Ask for the timezone. Never assume it.
 - Whether they want a satisfaction survey, and a name to send SMS from.
 
@@ -44,7 +44,7 @@ questions the other skills would otherwise ask.
 
 ## Checklist: brand
 
-- **WS-06** Pull the logo, the colours as hex and the fonts out of the material. Show what was found, each value with where it came from, and get a yes before the first write.
+- **WS-06** Pull the logo and the colours as hex out of the material. No font setting exists, so do not ask for fonts. Show what was found, each value with where it came from, and get a yes before the first write.
 - **WS-07** Look and feel: `update_branding`.
 - **WS-08** Email: `update_email_brand_settings`. It merges, and it makes the row when there is none.
 - **WS-09** Chat widget: `update_chat_widget`, light set and dark set.
@@ -57,15 +57,15 @@ Fields, patterns and defaults per surface: `references/brand-surfaces.md`.
 
 ## Checklist: groundwork
 
-- **WS-14** Scopes: `teams:manage` to create a team, `tags:*`, `opening-hours:*`, `csat:write`, `sms:write`, `snippets:write`, `branding:write`, `domains:write`.
+- **WS-14** Scopes: `teams:manage` to create a team, `tags:manage` to create, change or delete a tag (`tags:write` only puts tags on conversations), `opening-hours:*`, `csat:write`, `sms:write`, `snippets:write`, `branding:write`, `domains:write`.
 - **WS-15** One team per group that picks up work, named after the people, not a subject. At least one team, even empty.
 - **WS-16** `create_teams` {`name`, `description`, `memberIds`}, only for names not in `list_teams`. A `memberId` who is not a member of the workspace gets a 400 that names the id.
 - **WS-17** Change members only by the full-list merge in the basics file: `update_teams` replaces the list.
-- **WS-18** `create_tags` {`name` (max 100, exact case), `description`}, only for names not in `list_tags`. There is no update route, so the description is final.
+- **WS-18** `create_tags` {`name` (max 100, exact case), `description`, `parentTagId` for a sub-tag, `aiAutoTagEnabled`}, only for names not in `list_tags`. A name is unique in the whole workspace, also across parents. Keep a tree as a tree: never flatten it into "Root: sub" names. `update_tags` renames, moves (with the children), and sets `aiAutoTagEnabled` and `aiAlwaysCheck`; the AI fields need a key whose creator holds the AI settings permission. A child tag without `aiAutoTagEnabled` takes its parent's setting.
 - **WS-19** `create_opening_hours_rule` per schedule the customer keeps: `name`, `schedules`, `timezone`, `holidayCountry`, `dateOverrides`. **Send `timezone` as an IANA name (`Europe/Oslo`) on `create_opening_hours_rule` and on `set_opening_hours`: the default is UTC, so a rule without it opens at the wrong hour and nothing reports it.** The first rule of a workspace becomes the default.
 - **WS-20** `set_opening_hours_assignment` {`teamId`, `channel`, `ruleId`, `mode`} per team and channel pair. A pair with no assignment takes the default rule, which is not closed.
 - **WS-21** Survey on or off: `update_csat_settings` {`enabled`, `sendSurveyEnabled`}. `enabled` cannot become true until `mailgunDomainId` names an active sending domain.
-- **WS-22** SMS sender name: `update_sms_settings` {`senderName`}, 3 to 11 letters and digits with at least one letter. `null` puts every message back on the workspace number.
+- **WS-22** SMS sender name: `update_sms_settings` {`senderName`}, 3 to 11 letters and digits with at least one letter. `null` puts every message back on the workspace number. It is refused with 409 `SMS_NOT_SET_UP` until the workspace holds an SMS number; `request_sms_number` {`country`} asks for one, and an Atender administrator buys and assigns it.
 - **WS-23** Signature: `set_default_signature` writes it for the person whose API key this is. Say so before you write it.
 - **WS-24** Users: `list_users` only. An invite happens in the app, and before that person can be a team member.
 - **WS-25** Ask the customer for the timezone as an IANA name (`Europe/Oslo`) before the first `create_opening_hours_rule` or `set_opening_hours`, and send that answer in `timezone` on every rule. Then read every rule back with `list_opening_hours_rules` or `get_opening_hours_rule` and check each `timezone` equals the answer. A rule that reads `UTC` for a customer who did not say UTC is wrong by the offset.
@@ -74,8 +74,8 @@ Fields, patterns and defaults per surface: `references/brand-surfaces.md`.
 
 - A colour is a hex string. A colour name or `rgb()` is a 400 on `update_branding`, `update_email_brand_settings` and `update_incidents_settings`.
 - `null` clears a colour or a logo. Send it only when the customer asked for the value to go.
-- A second `create_tags` with an existing name answers 500 and makes nothing. List again; do not retry.
-- Tags made here never auto-tag. `list_users` shows only people already in a team; say so when someone named is missing.
+- A second `create_tags` with an existing name answers 409 and makes nothing. List again; do not retry.
+- A tag auto-tags only with `aiAutoTagEnabled` on it or its parent. `list_users` shows only people already in a team; say so when someone named is missing.
 - Teams cannot be deleted here. Tags can, with `delete_tags`; ask first.
 - Never omit `timezone` on an opening-hours write. The API stores `UTC` in silence, and every open-or-closed decision reads the rule's own timezone: handover deferral, the IVR `is-open` node and voice after hours.
 - Never overwrite a logo, colour, team or tag that already has a value unless the customer says yes to that object by name.
@@ -99,7 +99,7 @@ reports what a handset shows.
 
 ## What must be done in the app
 
-Fonts. Inviting a user. Deleting a team. AI auto-tagging per tag. Uploading an
+Inviting a user. Deleting a team. Uploading an
 image file — those routes are multipart and are not MCP tools, so host the logo
 yourself and pass the URL. The Knowledge Base portal layout, which
 `layoutConfigV3` and `templateConfig` refuse here. Removing a custom domain,

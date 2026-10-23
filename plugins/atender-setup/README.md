@@ -3,7 +3,7 @@
 A Claude Code plugin that sets up and audits an Atender workspace over the
 Atender MCP server. Eight skills, one per area of the product, built from the
 setup guide at https://www.atender.com/docs/mcp-setup (evidence date
-2026-09-10).
+2026-10-23).
 
 ## What's inside
 

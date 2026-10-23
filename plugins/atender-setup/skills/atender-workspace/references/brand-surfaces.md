@@ -110,9 +110,9 @@ domain is an app job.
 
 | What | Where it happens |
 | --- | --- |
-| Fonts and typefaces | The app. No route carries a font field |
+| Fonts and typefaces | Nowhere. No font setting exists, in the app or on the API |
 | Uploading an image file | Multipart routes exist on the REST API but are not MCP tools. Host the file and pass the URL |
 | The Knowledge Base portal layout | The app; `layoutConfigV3` and `templateConfig` are refused |
 | Removing a custom domain | The app |
 | The chat widget launcher image file | The app |
-| Deleting a team, inviting a user, AI auto-tagging per tag | The app |
+| Deleting a team, inviting a user | The app |

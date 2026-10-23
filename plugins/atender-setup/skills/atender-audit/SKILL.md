@@ -47,9 +47,9 @@ whether a gap is on purpose.
 
 1. Knowledge Base articles that sit at `draft`. Only `published` reaches the AI.
 2. A specialist that must follow policy with `handbookEnabled` false. The default is false on purpose: judge it against the specialist's job, never report the default itself as a fault. On text, this switch and `kbEnabled` gate retrieval; the stack's `knowledgeBaseEnabled` is a voice switch and gates nothing on text.
-3. An Agent Stack that is `enabled` with no enabled member. It answers nothing.
-4. A stack with `handoverMode: "explicit_team"` and no `handoverTeamId`. The handover then fails at run time; the error is logged and visible in the message debug panel in the app, so say where to look rather than that nobody sees an error.
-5. An email channel or custom channel with no `mainAgentId`, or a widget with no `aliMainAgentId`. It gets no AI answer, and nothing says so.
+3. An Agent Stack that is `enabled` with no enabled member. It answers nothing. The API now refuses this state on a write, so it is an older stack.
+4. A text stack with `handoverMode: "explicit_team"` and no `handoverTeamId`. The API now refuses this on a write, so it is an older stack. The handover then fails at run time; the error is logged and visible in the message debug panel in the app, so say where to look rather than that nobody sees an error.
+5. An email channel or custom channel with no `mainAgentId`, or a widget with neither `aliMainAgentId` nor `afterHoursMainAgentId`. It gets no AI answer, and nothing says so.
 6. A voice stack with no `voiceLanguageVoices` entry for a language it is meant to answer in. An empty map makes every call hear that the number is unavailable.
 7. No call queue while a phone number or IVR flow exists — the number never syncs. Also a queue the flow sends to with `callbackEnabled` off: the hold has no ceiling.
 8. A keyed `gather-input` with no `timeout` edge, a self edge, or a `send-to-queue` with no `is-open` before it. There is no per-key check: a `gather-input` declares no list of keys.
@@ -60,7 +60,7 @@ whether a gap is on purpose.
 ## Rules
 
 - **No write tool of any kind.** Not a create, not an update, not a delete, not a publish, not an enable, not a test. A test conversation is a write and a cost. If the customer asks for one, hand the run to the skill that owns the area.
-- Do not filter a list you use to decide what exists. `list_kb_articles` takes no `status` filter, `includeArchived=true`, and every page.
+- Do not filter a list you use to decide what exists. `list_kb_articles` takes no `status` filter, `includeArchived: true`, and every page.
 - A read that works does not prove write access. Never report write access as met.
 - Never guess a value you could not read. An unreadable area is reported as unreadable, with the status code.
 
@@ -74,6 +74,6 @@ whether a gap is on purpose.
 
 Nothing here — this skill changes nothing. Say in the report which gaps can only
 be closed in the app rather than over the API: inviting a user, deleting a team,
-AI auto-tagging per tag, fonts, uploading an image file, the Knowledge Base
-portal layout, removing a custom domain, publishing DNS records, requesting an
-SMS number, and entering any real credential.
+uploading an image file, the Knowledge Base portal layout, removing a custom
+domain, publishing DNS records, and entering any real credential. Fonts have no
+setting anywhere.
