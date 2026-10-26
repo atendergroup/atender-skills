@@ -8,13 +8,14 @@
 | --- | --- | --- | --- |
 | `read` | Reads nothing that belongs to one person — a price list, opening hours, a product catalogue | 0 | Nothing |
 | `read_verified` | Reads one person's data — an order, an invoice, a booking | 2 | A one-time code |
-| `act` | Changes one person's data — reschedules, updates an address, cancels | 2 | A one-time code |
+| `act` | Changes one person's data — reschedules, updates an address, cancels | 2 (3 on a connection that signs the customer in) | A one-time code |
 | `transact` | Money — a refund, a charge, a credit | 3 | A signed-in customer. On a call it hands over instead |
 
 From the table:
 
-- Verification settings (CV-01 to CV-05) come before any Capability above `read` goes on a stack.
-- Give no level 2 Capability to a stack whose channel has no working method: voice with `voiceCallerVerificationEnabled` false, or text with `stepUpByCodeEnabled` false. The chat widget is the exception.
+- Verification settings (CV-01, CV-04, CV-05) come before any Capability above `read` goes on a stack.
+- Give no level 2 Capability to a voice stack with `voiceCallerVerificationEnabled` false. On text the code step-up is always on.
+- A `transact` Capability that no customer can reach (no connection signs customers in) still publishes, with `meta.warnings`, but the Agent Stack never gets the tool.
 - Every specialist holding a level 2 Capability carries the CV-07 wording in its `systemPrompt`.
 
 ## Changing a live Capability (CA-11)

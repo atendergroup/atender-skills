@@ -40,7 +40,7 @@ asked for in their own sections.
 
 - **AS-01** Inventory. Per stack: `name`, `type`, `enabled`, `catchAllSpecialistId`, members and whether each is enabled, `kbPartitionId`, `handbookPartitionId`, `knowledgeBaseEnabled` (voice only, AS-05), orchestrator `resolvedSource`. Name the channels, email channels, phone numbers and SMS numbers that carry it in `mainAgentId`. Report a stack nothing points at.
 - **AS-02** Stack count = one per job, not one per channel. Voice gets its own stack.
-- **AS-03** `create_agent_stacks`: `name` (unique, the natural key), `type`, `enabled: false` — the default is true, so a stack is live from its create call. Order: **create disabled, add specialists and members, bind the channel, then `enable_agent_stacks`.** A stack enabled earlier answers with no members behind it.
+- **AS-03** `create_agent_stacks`: `name` (unique, the natural key), `type`. A new stack is always created disabled: leave `enabled` out, because `enabled: true` on the create is refused with 409. Order: **create, add specialists and members, bind the channel, test, then `enable_agent_stacks`.** An enable, or `enabled: true` on `update_agent_stacks`, on a stack with no enabled specialist is refused with 409 `STACK_HAS_NO_ENABLED_SPECIALIST`.
 - **AS-04** Bind partitions: `kbPartitionId` and `handbookPartitionId` from `list_kb_partitions` / `list_handbook_partitions`, even with one of each. A later `kbPartitionId` change drops the members' category limits.
 - **AS-05** `knowledgeBaseEnabled` is a **voice** switch and gates nothing on text. Text retrieval is per specialist: `kbEnabled` and `handbookEnabled` (SP-04). Do not set it on a text stack, and do not report it as a fault there.
 - **AS-06** Before any member is added: each specialist exists, is enabled, and has its final description (SP-03).
@@ -49,30 +49,35 @@ asked for in their own sections.
 - **AS-09** `catchAllSpecialistId` = the intended specialist. To correct it: `update_agent_stacks` {`catchAllSpecialistId`}. It must be an enabled member.
 - **AS-10** Orchestrator: read first. `update_agent_stack_orchestrator` {`systemPrompt`} only for stack-wide routing the descriptions cannot carry; it adds to the built-in prompt.
 - **AS-11** Handover, verification, personality and specialists: `references/specialists-and-personality.md` and `references/handover-and-verification.md`.
-- **AS-12** Enable gate, last. The route checks nothing, so you check: AS-03 to AS-11 done, the specialists of SP-03 and SP-04 in place, HO-01 and HO-02 set, one channel bound to this stack, and one test conversation passed (TC-01). Then `enable_agent_stacks`. Way out: `disable_agent_stacks`.
+- **AS-12** Enable gate, last. The route checks only that an enabled specialist exists, so you check the rest: AS-03 to AS-11 done, the specialists of SP-03 and SP-04 in place, HO-01 and HO-02 set, one channel bound to this stack, and `test_agent_stacks` passed on three real situations (TC-01 a). `test_agent_stacks` works on a disabled stack. Then `enable_agent_stacks`, then the pull-channel walk below. Way out: `disable_agent_stacks`.
 
 ### The minimum a lone stack needs
 
 When the run covers the stack and nothing else, it still has to be complete:
 
 - **AS-M1** One specialist, before AS-06. If none exists: `create_specialists` {`displayName`, `systemPrompt`, `description` = one sentence on what it owns, as a criterion}. `handbookEnabled: true` where it must follow policy; `enabled` and `kbEnabled` default to true. The description is final before the member add, and the first enabled member becomes the catch-all.
-- **AS-M2** A handover target, in one `update_agent_stacks` call before the enable: `handoverMode: "explicit_team"`, `handoverTeamId` = a team from `list_teams` (`create_teams` if there is none), `handoverAskConfirmation: true`. If there is no handover yet, set `handoverMode: "never"` explicitly and report AS-M2 as a gap: the stack then never gives a conversation to a person.
+- **AS-M2** A handover target, in one `update_agent_stacks` call before the enable: `handoverMode: "explicit_team"`, `handoverTeamId` = a team from `list_teams` (`create_teams` if there is none), `handoverAskConfirmation: true`. If there is no handover yet, set `handoverMode: "never"` explicitly and report AS-M2 as a gap: the stack then never gives a conversation to a person. In that same call send no handover switch as `true` (a body with `never` and a switch on is refused with 400 `HANDOVER_SWITCHES_NEED_A_MODE`; on a create, a body with no mode counts as `never`); a switch already stored on the stack does not block it.
 - **AS-M3** One channel bound to this stack, with the customer's yes: `update_email_channels` {`mainAgentId`}, `update_chat_widget` {`aliMainAgentId`}, or `create_channels` / `update_channels` {`mainAgentId`}. Say which stack each channel leaves. No channel yet: report AS-M3 as a gap, nothing reaches the stack.
 
 ### The safe enable test, and how to read a trace
 
-The safe path is a **pull channel**: a custom channel with no webhook, so there
-is nowhere a reply can be pushed and nothing reaches a customer. After AS-12:
+Before the enable, `test_agent_stacks` {`testInput`} on the stack proves the
+wording and the routing: it runs one turn on the stack, also a disabled one, writes
+no conversation, sends nothing on a channel and commits no handover. The caller is
+level 0, and a level-0 tool it calls runs against the real system. Send the
+`conversationId` it returns back with `conversationHistory` for the next turn.
+
+A message on a channel runs a turn only on an enabled stack, so the channel walk
+comes after AS-12. The safe path is a **pull channel**: a custom channel with no
+webhook, so there is nowhere a reply can be pushed and nothing reaches a customer.
+After AS-12:
 
 1. `create_channels` {`type: "custom"`, `mainAgentId` = this stack, `defaultTeamId`, **no `webhookUrl`**}.
 2. `create_channels_messages` with the customer's first message.
 3. Read the trace: `list_conversations_messages`, `list_conversation_events`, `list_routing_decisions` (specialist, confidence) and `list_tool_execution_logs` (what ran and what it returned).
 
 The conversation is real and counts in analytics: keep the batch small and tag
-it. Lighter alternative: `test_specialists` {`mainAgentId` = this stack} on
-three real situations — wording and routing only, no conversation, no handover
-commit, no routing decision. Never `create_conversations_inbound` here: every AI
-reply is a real email.
+it. Never `create_conversations_inbound` here: every AI reply is a real email.
 
 <!-- site:skip -->
 ## The other checklists
@@ -97,6 +102,6 @@ reply is a real email.
 
 ## What must be done in the app
 
-AI auto-tagging per tag, enabling languages, restricting a specialist to some
+Restricting a specialist to some
 Knowledge Base categories, adding a user who is in no team, entering a real
 credential. Tell the customer which are waiting on them.

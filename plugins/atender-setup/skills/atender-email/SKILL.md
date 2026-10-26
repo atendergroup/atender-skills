@@ -20,8 +20,8 @@ assistant says belongs to `atender-agent-stack-text`.
 
 Read `../_shared/atender-setup-basics.md` first — connection, precedence, the
 order of areas, the preflight, pacing, the report format and the groundwork
-areas. Then call `describe_configuration_model`; channels are missing from it
-entirely today, so this skill wins on order and on how to test.
+areas. Then call `describe_configuration_model` with `area: "web-chat-email"`;
+this skill wins on order and on how to test.
 
 The order is: teams, then the Agent Stack, then the domain, then verify, then the
 inbox as `disabled`, then a test, then `active`. Never the other way round: an
@@ -41,9 +41,9 @@ Reading email domains needs `email:read`; the rest of this area needs
 
 - **CH-01** For each channel, report its Agent Stack (`mainAgentId`), team and status. A channel with no stack gets no AI answer.
 - **CH-02** Use the provisioned email domain unless the customer wants their own. For their own: `create_email_domains` {`domainName`, `fromEmail`, `fromName`}. **If the apex domain already receives mail, register a subdomain instead — `mail.example.com`, `help.example.com` — and leave the apex alone.** The records the call returns include MX, and MX records move all inbound mail for whatever name they are published on.
-- **CH-03** Give the customer `dnsRecords` as a table. After they publish them, call `create_email_domains_verify` once: status `active`, every record `valid`.
-- **CH-04** `create_email_channels` with `mainAgentId`, `teamId` and `status: "disabled"`. After the email test passes: `update_email_channels` `status: "active"`.
-- **CH-08** `update_sms_settings` {`senderName`}. `update_sms_number_routing` takes `teamId` or `mainAgentId`, never both.
+- **CH-03** Give the customer `dnsRecords` as a table. After they publish them, call `create_email_domains_verify` once: status `active`, every record `valid`. A domain reaches `active` on its sending records alone, so `active` does not prove that inbound mail arrives: the test email in Verify does.
+- **CH-04** `create_email_channels` with `mainAgentId`, `teamId` and `status: "disabled"`. It is refused with 400 `DOMAIN_INACTIVE` until the domain is `active`. After the email test passes: `update_email_channels` `status: "active"`.
+- **CH-08** SMS needs a number first. `request_sms_number` {`country`} asks Atender for one; it buys nothing, an Atender administrator reviews the request, buys the number and assigns it, and then `list_sms_numbers` shows it. `update_sms_settings` {`senderName`} is refused with 409 `SMS_NOT_SET_UP` while the workspace holds no SMS number. `update_sms_number_routing` takes `teamId` or `mainAgentId`, never both.
 - **CH-09** Brand: `update_email_brand_settings`, `update_branding`, and `set_default_signature` where a person's signature is wanted.
 
 The DNS record table, the delays and the deliverability reads are in
@@ -53,6 +53,7 @@ The DNS record table, the delays and the deliverability reads are in
 
 - Say the MX warning in CH-02 to the customer in plain words before they touch DNS. It is the one change here that can take a company's mail down.
 - An inbox on a domain that is not `active` is refused with 400 `DOMAIN_INACTIVE`. Verify the domain first.
+- Way out for a domain: `delete_email_domains`. A domain that is not verified and has no inbox is deleted, also at the email provider, and cannot be restored. A verified domain, or one with an inbox, is only disabled with all its inboxes. Read `outcome` (`deleted` or `disabled`) in the answer. Ask the customer first, by name.
 - `set_default_signature` is a person's signature, not the AI's. The assistant's wording lives in the stack personality, and there is no greeting or signature field there.
 
 ## Delays
@@ -71,6 +72,6 @@ DNS propagation is not instant. Publish, wait, then call
 
 ## What must be done in the app
 
-Publishing the DNS records at their own DNS provider. Requesting an SMS number.
-Entering any real credential. Tell the customer which are waiting on them, and
+Publishing the DNS records at their own DNS provider. Entering any real
+credential. Tell the customer which are waiting on them, and
 give them the record table to hand to whoever runs their DNS.

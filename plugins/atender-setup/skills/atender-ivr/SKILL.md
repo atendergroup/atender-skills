@@ -19,8 +19,8 @@ What the AI assistant says once a call reaches it belongs to
 
 Read `../_shared/atender-setup-basics.md` first — connection, precedence, the
 order of areas, the preflight, pacing, the report format and the groundwork
-areas. Then call `describe_configuration_model`; it has no voice or IVR section
-today, so this skill wins on order and on how to test.
+areas. Then call `describe_configuration_model` with `area: "ivr"`; this skill
+wins on order and on how to test.
 
 The order is: teams, then call queues, then the number, then the flow, then the
 definition, then the bind, then publish. Without a queue the flow write answers
@@ -45,9 +45,9 @@ caller hears today.
 - **IV-02** Number: `phoneNumber` starts with `+`, `capabilities.voice` is true, and there is one row per number in `list_voice_phone_numbers`. If not, stop.
 - **IV-03** `create_ivr_flows`: `ttsLanguage` (BCP-47) and `ttsVoice` (a Polly name). No `welcomeMessage`.
 - **IV-04** Definition: `update_ivr_flows_definition` with the whole graph, written before the bind. The node types, their required data and the edge handles are in `references/flow-graph.md`.
-- **IV-05** Check the graph yourself: the validator checks none of it. Walk the list in `references/flow-graph.md`, and confirm the node and edge counts match what you sent.
+- **IV-05** Check the graph yourself: the validator checks almost none of it. Walk the list in `references/flow-graph.md`, and confirm the node and edge counts match what you sent.
 - **IV-06** Bind: `update_voice_phone_numbers` with `ivrFlowId`, `mainAgentId` and `defaultAgentLanguage` in one call. If `provider.configured` is false, call `create_voice_phone_numbers_provision` once. On a 409, stop and tell the customer.
-- **IV-07** Publish: after **every** `update_ivr_flows_definition`, call `publish_ivr_flows` with a comment and then check `provisioningError` is null. An unpublished definition changes nothing a caller hears, and a publish that left `provisioningError` set has not reached the carrier.
+- **IV-07** Publish: after **every** `update_ivr_flows_definition`, call `publish_ivr_flows` with a comment and then check `provisioningError` is null. On a number that already runs the flow, the definition write itself is live within about 30 seconds and answers its own `provisioningError`; the publish stamps a revision and writes the flow to the phone network again. A `provisioningError` that is set means the change has not reached the carrier. Only `update_voice_phone_numbers` binds a number to a flow.
 
 ## Rules
 

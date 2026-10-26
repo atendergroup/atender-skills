@@ -35,7 +35,8 @@ one change in this area that can take a company's mail down.
 | TXT (DMARC) | Policy for SPF and DKIM failures | **Do not touch it.** If none exists, leave it to the customer |
 
 After they publish: `create_email_domains_verify`, once. Status must read
-`active` and every record `valid`. If a record still reads `invalid` after the
+`active` and every record `valid`. `active` comes from the sending records alone;
+it does not prove that inbound mail arrives. If a record still reads `invalid` after the
 TTL has passed, read the expected value back from `get_email_domains` and
 compare character by character — a trailing dot, a split TXT value, or an SPF
 record replaced rather than merged are the usual causes.
@@ -63,10 +64,11 @@ activity, not the conversation.
 
 ## SMS sending
 
-- `update_sms_settings` {`senderName`}: 3 to 11 letters and digits. Some countries ignore an alphanumeric sender and substitute a number; a person has to read it on a real handset.
+- A number first: `request_sms_number` {`country`}. An Atender administrator buys and assigns it; a repeat for the same country returns the first request, and `cancel_sms_number_request` withdraws one.
+- `update_sms_settings` {`senderName`}: 3 to 11 letters and digits, at least one letter. Refused with 409 `SMS_NOT_SET_UP` until the workspace holds an SMS number. Some countries ignore an alphanumeric sender and substitute a number; a person has to read it on a real handset.
 - `update_sms_number_routing` takes `teamId` **or** `mainAgentId`, never both.
 - `list_sms_numbers` shows what exists; `list_sms_messages` and `get_sms_message` read a message back, and `refresh_sms_message_status` re-reads its status from the carrier.
-- Never set SMS `enabled` to false as a pause. It stops one-time codes too, so every customer verification on SMS fails silently.
+- Never set SMS `enabled` to false as a pause. It stops every outbound SMS, one-time codes, satisfaction survey invitations and callback messages included, so every customer verification on SMS fails silently.
 
 <!-- site:skip -->
 ## Signatures

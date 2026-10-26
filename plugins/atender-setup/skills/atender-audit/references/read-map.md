@@ -9,7 +9,7 @@ value, a 403 (unreadable) or a 404 (a module that may be off).
 | --- | --- |
 | `list_teams` | Teams and their members |
 | `list_users` | Only people already in a team |
-| `list_tags` | Conversation tags, with their auto-tag fields |
+| `list_tags` | Conversation tags, their parents, and their auto-tag fields |
 | `list_opening_hours_rules` | Schedules, `timezone`, which is `isDefault` |
 | `list_opening_hours_assignments` | Which team and channel pair uses which rule |
 | `get_opening_hours` | The week as it stands |
@@ -20,7 +20,8 @@ value, a 403 (unreadable) or a 404 (a module that may be off).
 | --- | --- |
 | `list_kb_partitions` | Which knowledge base is `isDefault` |
 | `list_kb_categories`, `list_kb_subcategories` | The shape a customer navigates |
-| `list_kb_articles` | Every article and its status. No `status` filter, `includeArchived=true`, every page |
+| `list_kb_articles` | Every article and its status. No `status` filter, `includeArchived: true`, every page |
+| `list_kb_languages` | The knowledge base languages and which are `active` (translated) |
 | `list_kb_tags` | A separate list from conversation tags |
 | `get_kb_portal_settings` | The portal look and `kbTemplate` |
 | `list_handbook_partitions` | Which handbook is `isDefault` |
@@ -38,7 +39,7 @@ value, a 403 (unreadable) or a 404 (a module that may be off).
 | `list_specialists`, `get_specialists` | `enabled`, `kbEnabled`, `handbookEnabled`, `description`, `systemPrompt` |
 | `list_specialists_tools` | Which tools each specialist holds |
 | `list_specialists_playbooks`, `list_specialists_routing_rules` | Fixed sequences and routing |
-| `list_verification_settings` | Which channels demand a verified customer |
+| `list_verification_settings` | `revealPosture` and `voiceCallerVerificationEnabled` |
 
 ## Capabilities and connections
 
@@ -57,7 +58,8 @@ value, a 403 (unreadable) or a 404 (a module that may be off).
 | `list_channels`, `get_channels` | Custom channels, `mainAgentId`, `isActive` |
 | `list_email_channels` | Inboxes, `mainAgentId`, `teamId`, status |
 | `list_email_domains` | Sending domains, and whether each record is `valid` |
-| `list_chat_widgets`, `get_chat_widget` | `aliMainAgentId`, `defaultTeamId`, languages, messages |
+| `list_chat_widgets`, `get_chat_widget` | `aliMainAgentId`, `afterHoursMainAgentId`, `defaultTeamId`, languages, messages |
+| `list_chat_widget_translations` | The widget texts per secondary language |
 | `list_channel_deliveries` | Whether a push channel is delivering |
 | `get_sms_settings`, `list_sms_numbers` | `senderName` and the numbers |
 | `list_custom_domains` | Hostnames and their status |

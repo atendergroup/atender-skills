@@ -8,12 +8,19 @@
 | --- | --- | --- |
 | `incoming-call` | none | one out. Exactly one of these per flow |
 | `gather-input` | `prompt`, `retryPrompt` (silence), `invalidPrompt` (wrong key), `maxRetries` (the number of asks, default 3), `timeout` (seconds, 1 or more), `language` (BCP-47), `voice` | one `digit-N` per key offered, plus a `timeout` edge |
-| `language-selection` | `languages[{languageCode, languageName, dtmfKey}]`, `prompts` for each code | one `lang-<key>` per key |
+| `language-selection` | `languages[{languageCode, languageName, dtmfKey}]`, `prompts` for each code | one `lang-<key>` per key, plus `timeout` |
 | `say-message` | the message, `language` (BCP-47), `voice` | one out |
 | `is-open` | `openingHoursRuleId` | `true` and `false` |
 | `send-to-queue` | the queue id | none |
-| `send-to-ai-agent` | `agentId`, `languageCode` (primary subtag: `no`, `en`) | none |
-| voicemail | as the live schema says | none |
+| `send-to-ai-agent` | `agentId`, `languageCode` (primary subtag `no`, `en`, or BCP-47) | none |
+| voicemail, `hang-up` | as the live schema says | none |
+| `send-to-callback-queue` | `queueId` | none |
+| `transfer` | `destination` | none |
+
+The live schema also has `play-audio` (`audioUrl`), `condition` (`expression`),
+`switch` (`variable`, one edge per value plus `default`), `api-call` (`url`, edges
+`success` and `error`), `send-sms` (`message`, `fromNumberId`) and
+`incident-message` (`message`, spoken only while the incident message is on).
 
 The live tool schema wins on field names and on any node type not listed here.
 
@@ -33,9 +40,9 @@ The live tool schema wins on field names and on any node type not listed here.
 | --- | --- |
 | `ttsLanguage` on the flow | BCP-47 (`nb-NO`) |
 | `language` on `say-message` and `gather-input` | BCP-47 |
-| `languageCode` on `send-to-ai-agent` | primary subtag (`no`, `en`) |
+| `languageCode` on `send-to-ai-agent` | primary subtag (`no`, `en`) or BCP-47 |
 | `defaultAgentLanguage` on the number | primary subtag |
-| `languageCode` in `language-selection.languages` | as the live schema says; check it |
+| `languageCode` in `language-selection.languages` | BCP-47 |
 
 `ttsVoice` on the flow and `voice` on a node are Amazon Polly names. The Agent
 Stack's `voiceLanguageVoices` takes ElevenLabs ids. They are not interchangeable.
@@ -51,8 +58,9 @@ Stack's `voiceLanguageVoices` takes ElevenLabs ids. They are not interchangeable
 <!-- site:skip -->
 ## Checking the graph yourself (IV-05)
 
-The validator does not check any of this. Before you publish, walk the graph and
-confirm:
+The validator checks only one edge per language on a `language-selection` and at
+least one edge on a `gather-input`. It checks none of the list below. Before you
+publish, walk the graph and confirm:
 
 1. Every keyed `gather-input` has a `timeout` edge.
 2. No edge points at its own source node.
