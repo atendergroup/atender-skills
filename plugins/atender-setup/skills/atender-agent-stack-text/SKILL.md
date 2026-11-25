@@ -74,7 +74,7 @@ After AS-12:
 
 1. `create_channels` {`type: "custom"`, `mainAgentId` = this stack, `defaultTeamId`, **no `webhookUrl`**}.
 2. `create_channels_messages` with the customer's first message.
-3. Read the trace: `list_conversations_messages`, `list_conversation_events`, `list_routing_decisions` (specialist, confidence) and `list_tool_execution_logs` (what ran and what it returned).
+3. Read the trace: `list_conversations_messages`, `list_conversation_events` and `list_tool_execution_logs` (what ran and what it returned).
 
 The conversation is real and counts in analytics: keep the batch small and tag
 it. Never `create_conversations_inbound` here: every AI reply is a real email.
