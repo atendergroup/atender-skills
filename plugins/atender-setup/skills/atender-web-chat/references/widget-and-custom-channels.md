@@ -91,8 +91,8 @@ Create it with **no `webhookUrl`**: there is then nowhere a reply can be pushed.
 The stack must be enabled first: a message on a channel runs a turn only on an
 enabled stack. Prove the wording before the enable with `test_agent_stacks`.
 Send with `create_channels_messages` and read the trace back with
-`list_conversations_messages`, `list_conversation_events`,
-`list_routing_decisions` and `list_tool_execution_logs`. This is the safe test
+`list_conversations_messages`, `list_conversation_events` and
+`list_tool_execution_logs`. This is the safe test
 path (TC-01). The conversation is real and counts in analytics.
 
 Facts to hold on to:
